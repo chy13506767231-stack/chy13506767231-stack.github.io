@@ -397,7 +397,10 @@ var S={
   fun:DB.g("fun",[{id:1,name:"Threads",url:"https://www.threads.com/"},{id:2,name:"Instagram",url:"https://www.instagram.com/"},{id:3,name:"YouTube",url:"https://www.youtube.com/"}]),
   daily:DB.g("daily",[]),
   manual:{}, manualTS:0,
-  save:function(){STORE_KEYS.forEach(function(k){DB.s(k,this[k])}.bind(this))},
+  /* 在线时每次保存都立即把最新状态推云端（含删除）。
+     这是修复「本地删除刷新后又被云端并集合并补回来」的关键：删除必须同步到云端真源，
+     否则 mergeLWW 的并集合并会认为「云端有、本地没有」而把项目复活。 */
+  save:function(){STORE_KEYS.forEach(function(k){DB.s(k,this[k])}.bind(this)); if(REMOTE_OK)cloudPut(cloudObj(),function(ok){setSyncPill(ok?"☁️ 已同步云端":"📴 离线·本机"); if(!ok)toast("云端同步失败，改动已保存在本机",3000)})},
   nid:function(l){return l.length?Math.max.apply(null,l.map(function(i){return i.id}))+1:1}
 };
 
@@ -794,7 +797,8 @@ function rp(){
       var pid=+b.dataset.pjDel;
       if(!confirm("确定删除该项目？"))return;
       var pname=(S.projects.find(function(x){return x.id===pid})||{}).name;
-      S.projects=S.projects.filter(function(x){return x.id!==pid});
+      /* 按「项目名」删除（与 mergeKey 一致）：云端曾出现 id=4 被「小爆款」与「丁禹兮」共用，按 id 删会误删另一条，故改按唯一的项目名删 */
+      S.projects=S.projects.filter(function(x){return x.name!==pname});
       /* 联动清理：项目删了，热点资讯里该项目名下的热点也一起删 */
       if(pname){S.news=S.news.filter(function(n){return n.project!==pname});}
       S.save();renderHeader();rp();
