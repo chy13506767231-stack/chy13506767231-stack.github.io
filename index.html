@@ -366,19 +366,30 @@ var DB={
 var SN=["资源包","推策划","推脚本","推视频","发布中","已发布","数据回收中","复盘"];
 var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","reviews","reflects","scripts","aitool","fun","daily","manual","manualTS","deleted"];
 
-/* ================= 云端存储（JSONBin）：手机/电脑多设备共享同一份数据 ================= */
-var CLOUD={KEY:"$2a$10$RMv3gw4ZpFqzC/2FF7Sk8OPZevlLjG4n9fD6nJjm2Uc6HFkK2u/OC", BIN:"6a6cf458da38895dfea9e871"};
+/* ================= 云端存储（GitHub）：手机/电脑多设备共享同一份数据 ================= */
+/* 读取：raw.githubusercontent.com 免认证、无频率限制，所有设备可用。
+   写入：Mac 端通过 serve.py /api/data 代理（免 PAT 暴露）；手机端只读，改动等 Mac 同步。 */
+var CLOUD={REPO:"chy13506767231-stack/chy13506767231-stack.github.io",FILE:"data.json",BRANCH:"main"};
 function cloudObj(){var o={};STORE_KEYS.forEach(function(k){o[k]=S[k]});return o}
 function cloudGet(cb){
-  fetch("https://api.jsonbin.io/v3/b/"+CLOUD.BIN+"/latest",{headers:{"X-Master-Key":CLOUD.KEY,"User-Agent":"Mozilla/5.0"}})
+  /* 读取：走 raw.githubusercontent.com（公开仓库无需认证，无频率限制） */
+  fetch("https://raw.githubusercontent.com/"+CLOUD.REPO+"/"+CLOUD.BRANCH+"/"+CLOUD.FILE,{headers:{"User-Agent":"Mozilla/5.0"}})
     .then(function(r){return r.ok?r.json():null})
-    .then(function(j){cb(j&&j.record?j.record:null)})
+    .then(function(j){cb(j)})
     .catch(function(){cb(null)});
 }
 function cloudPut(obj,cb){
-  fetch("https://api.jsonbin.io/v3/b/"+CLOUD.BIN,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":CLOUD.KEY,"User-Agent":"Mozilla/5.0"},body:JSON.stringify(obj)})
-    .then(function(r){if(cb)cb(r.ok)})
-    .catch(function(){if(cb)cb(false)});
+  /* Mac(localhost)：POST 到 serve.py /api/data → serve.py 代理写 GitHub + git push
+     手机/其他：只存 localStorage，显示「📱 离线编辑」状态 */
+  if(REMOTE_OK&&backendAvailable()){
+    fetch("/api/data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj)})
+      .then(function(r){return r.json()})
+      .then(function(j){if(cb)cb(j&&j.ok)})
+      .catch(function(){if(cb)cb(false)});
+  } else {
+    /* 非 Mac 环境：只把数据保存在云端 JSON 文件里走不了，下次 Mac 同步时自动推送 */
+    if(cb)cb(false);
+  }
 }
 /* 后端独占功能（刷新运势/抓热点/上传）只在 Mac 本地工作台可用，云端版走友好提示 */
 function backendAvailable(){ return location.protocol!=="file:" && /^(localhost|127\.0\.0\.1)$/.test(location.hostname); }
@@ -1585,7 +1596,7 @@ function startSync(){
   syncTimer=setInterval(function(){
     if(modalOpen())return; /* 编辑中不触发 */
     syncPull();
-  },30000);
+  },300000); /* 5 分钟自动同步一次（原 30 秒太频繁，浪费云端请求额度） */
 }
 
 function boot(){
