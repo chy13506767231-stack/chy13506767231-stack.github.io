@@ -364,7 +364,7 @@ var DB={
   s:function(k,v){localStorage.setItem(this.k(k),JSON.stringify(v))}
 };
 var SN=["资源包","推策划","推脚本","推视频","发布中","已发布","数据回收中","复盘"];
-var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","reviews","reflects","scripts","aitool","fun","daily","manual","manualTS"];
+var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","reviews","reflects","scripts","aitool","fun","daily","manual","manualTS","deleted"];
 
 /* ================= 云端存储（JSONBin）：手机/电脑多设备共享同一份数据 ================= */
 var CLOUD={KEY:"$2a$10$RMv3gw4ZpFqzC/2FF7Sk8OPZevlLjG4n9fD6nJjm2Uc6HFkK2u/OC", BIN:"6a6cf458da38895dfea9e871"};
@@ -397,6 +397,11 @@ var S={
   fun:DB.g("fun",[{id:1,name:"Threads",url:"https://www.threads.com/"},{id:2,name:"Instagram",url:"https://www.instagram.com/"},{id:3,name:"YouTube",url:"https://www.youtube.com/"}]),
   daily:DB.g("daily",[]),
   manual:{}, manualTS:0,
+  deleted:{},
+  /* 墓碑机制：记录已删除条目的 mergeKey，跨设备同步后永不复活。
+     S.deleted = { "projects": ["百度文库-博物馆"], "todos": [5], ... }
+     每次 delete 操作都会把被删条目的 key 写入此对象，随 JSONBin 同步到所有端。
+     mergeLWW 合并结束后、渲染前都会按墓碑过滤，确保已删条目不再出现。 */
   /* 在线时每次保存都立即把最新状态推云端（含删除）。
      这是修复「本地删除刷新后又被云端并集合并补回来」的关键：删除必须同步到云端真源，
      否则 mergeLWW 的并集合并会认为「云端有、本地没有」而把项目复活。 */
@@ -754,7 +759,7 @@ function rt(){
     });
   });
   document.querySelectorAll("[data-tdel]").forEach(function(b){
-    b.addEventListener("click",function(){S.todos=S.todos.filter(function(x){return x.id!==+b.dataset.tdel});S.save();renderHeader();rt()});
+    b.addEventListener("click",function(){var delItem=S.todos.find(function(x){return x.id===+b.dataset.tdel}); if(delItem) tombstone("todos", delItem.id); S.todos=S.todos.filter(function(x){return x.id!==+b.dataset.tdel});S.save();renderHeader();rt()});
   });
 }
 function todoModal(id){
@@ -798,6 +803,7 @@ function rp(){
       if(!confirm("确定删除该项目？"))return;
       var pname=(S.projects.find(function(x){return x.id===pid})||{}).name;
       /* 按「项目名」删除（与 mergeKey 一致）：云端曾出现 id=4 被「小爆款」与「丁禹兮」共用，按 id 删会误删另一条，故改按唯一的项目名删 */
+      if(pname) tombstone("projects", pname);
       S.projects=S.projects.filter(function(x){return x.name!==pname});
       /* 联动清理：项目删了，热点资讯里该项目名下的热点也一起删 */
       if(pname){S.news=S.news.filter(function(n){return n.project!==pname});}
@@ -884,6 +890,7 @@ function rpd(){
   document.querySelectorAll("[data-pd-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该文档夹及其中所有文档？"))return;
+      tombstone("projdocs", +b.dataset.pdDel);
       S.projdocs=S.projdocs.filter(function(x){return x.id!==+b.dataset.pdDel});S.save();rpd();
     });
   });
@@ -985,7 +992,7 @@ function rn(){
   document.getElementById("add-news-btn").addEventListener("click",function(){newsModal(null)});
   document.querySelectorAll("[data-nw-edit]").forEach(function(b){b.addEventListener("click",function(){newsModal(+b.dataset.nwEdit)})});
   document.querySelectorAll("[data-nw-del]").forEach(function(b){
-    b.addEventListener("click",function(){S.news=S.news.filter(function(x){return x.id!==+b.dataset.nwDel});S.save();rn()});
+    b.addEventListener("click",function(){tombstone("news", +b.dataset.nwDel); S.news=S.news.filter(function(x){return x.id!==+b.dataset.nwDel});S.save();rn()});
   });
   document.getElementById("import-hot-btn").addEventListener("click",importHot);
   document.getElementById("monitor-btn").addEventListener("click",runMonitor);
@@ -1136,6 +1143,7 @@ function rtp(){
   document.querySelectorAll("[data-tp-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该模板？"))return;
+      tombstone("templates", +b.dataset.tpDel);
       S.templates=S.templates.filter(function(x){return x.id!==+b.dataset.tpDel});S.save();rtp();
     });
   });
@@ -1181,6 +1189,7 @@ function rid(){
   document.querySelectorAll("[data-id-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该文档？"))return;
+      tombstone("impdocs", +b.dataset.idDel);
       S.impdocs=S.impdocs.filter(function(x){return x.id!==+b.dataset.idDel});S.save();rid();
     });
   });
@@ -1304,6 +1313,7 @@ function rv(){
   document.querySelectorAll("[data-rv-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该复盘？"))return;
+      tombstone("reviews", +b.dataset.rvDel);
       S.reviews=S.reviews.filter(function(x){return x.id!==+b.dataset.rvDel});S.save();rv();
     });
   });
@@ -1338,7 +1348,7 @@ function rrf(){
   document.getElementById("add-rf-btn").addEventListener("click",function(){rfModal(null)});
   document.querySelectorAll("[data-rf-edit]").forEach(function(b){b.addEventListener("click",function(){rfModal(+b.dataset.rfEdit)})});
   document.querySelectorAll("[data-rf-del]").forEach(function(b){
-    b.addEventListener("click",function(){S.reflects=S.reflects.filter(function(x){return x.id!==+b.dataset.rfDel});S.save();rrf()});
+    b.addEventListener("click",function(){tombstone("reflects", +b.dataset.rfDel); S.reflects=S.reflects.filter(function(x){return x.id!==+b.dataset.rfDel});S.save();rrf()});
   });
 }
 function rfModal(id){
@@ -1373,6 +1383,7 @@ function rs(){
   document.querySelectorAll("[data-sc-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该话术？"))return;
+      tombstone("scripts", +b.dataset.scDel);
       S.scripts=S.scripts.filter(function(x){return x.id!==+b.dataset.scDel});S.save();rs();
     });
   });
@@ -1486,6 +1497,19 @@ function modalOpen(){var m=document.querySelector(".modal-bg");return !!m && m.s
    - 云端多出来的条目：直接补进本地
    - 本地优先原则：时间戳相同（极少）时保留本地，绝不删本地条目 */
 function mergeKey(k,x){ if(!x)return null; if(k==="projects")return x.name; if((k==="aitool"||k==="fun")&&x.url)return x.url; return x.id; }
+/* 墓碑（tombstone）：记录「已被用户删除的条目 key」，跨端同步，永不复活 */
+function tombstone(storeKey, mergeKeyValue){
+  if(mergeKeyValue==null) return;
+  S.deleted=S.deleted||{};
+  var list=S.deleted[storeKey]||(S.deleted[storeKey]=[]);
+  if(list.indexOf(mergeKeyValue)<0) list.push(mergeKeyValue);
+}
+/* 按墓碑过滤数组：去掉所有被标记为已删除的条目 */
+function applyTombs(k, arr){
+  var tombs=(S.deleted||{})[k];
+  if(!tombs||!tombs.length) return arr;
+  return arr.filter(function(x){ return tombs.indexOf(mergeKey(k,x))<0; });
+}
 function mergeLWW(remote){
   if(!remote)return false;
   var changed=false;
@@ -1512,9 +1536,9 @@ function mergeLWW(remote){
         var lk={}; loc.forEach(function(x){var key=mergeKey(k,x); if(key!=null)lk[key]=x;});
         merged.forEach(function(x){var key=mergeKey(k,x); if(key!=null){var l=lk[key]; if(!l||JSON.stringify(l)!==JSON.stringify(x))changed=true;}});
       }
-      S[k]=merged;
+      S[k]=applyTombs(k, merged);
     } else if(Array.isArray(rem) && !Array.isArray(loc)){
-      S[k]=rem; changed=true;
+      S[k]=applyTombs(k, rem); changed=true;
     }
   });
   /* 手动排序偏好：整对象 LWW（按 manualTS 取较新一方，平局听云端真源） */
@@ -1631,6 +1655,8 @@ function renderLinks(panelId,key,list,opt){
   p.querySelectorAll("[data-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除？"))return;
+      var delItem=S[key].find(function(x){return x.id===+b.dataset.del});
+      if(delItem) tombstone(key, mergeKey(key, delItem));
       S[key]=S[key].filter(function(x){return x.id!==+b.dataset.del});S.save();renderLinks(panelId,key,S[key],opt);
     });
   });
