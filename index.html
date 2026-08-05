@@ -1545,6 +1545,17 @@ function mergeLWW(remote){
   if(remote.manualTS && remote.manualTS>=(S.manualTS||0)){
     S.manual=remote.manual||{}; S.manualTS=remote.manualTS||0; changed=true;
   }
+  /* 墓碑对象合并：取「本地+云端」墓碑的并集（删除是单向积累，只会越来越多，并集最安全）。
+     必须单独处理：deleted 是对象不是数组，上面的数组合并分支不会碰它，否则云端墓碑拉不到本地、被同步冲掉 */
+  if(remote.deleted && typeof remote.deleted==="object"){
+    S.deleted=S.deleted||{};
+    Object.keys(remote.deleted).forEach(function(k2){
+      var rlist=remote.deleted[k2]||[];
+      var llist=S.deleted[k2]||(S.deleted[k2]=[]);
+      rlist.forEach(function(v){ if(llist.indexOf(v)<0) llist.push(v); });
+    });
+    changed=true;
+  }
   return changed;
 }
 /* 双向同步：拉云端做 LWW 合并（含你刚在手机改的）+ 把本地整体推云端 → 两端收敛一致。
