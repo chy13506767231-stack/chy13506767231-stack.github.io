@@ -1590,6 +1590,8 @@ function startSync(){
 
 function boot(){
   renderHeader();
+  /* 版本标记：确认加载的是新版代码 */
+  (function(){var b=document.getElementById("ver-badge"); if(!b){b=document.createElement("div");b.id="ver-badge";b.style.cssText="position:fixed;bottom:10px;right:14px;font-size:10px;color:#b9c4d4;z-index:999;pointer-events:none";b.textContent="v250805-hardfix";document.body.appendChild(b);}})();
   var h=(location.hash||"").replace(/^#/,"");
   if(h && TABS.indexOf(h)>=0) st(h);
   else st("overview");
@@ -1602,6 +1604,19 @@ if(location.protocol!=="file:"){
   REMOTE_OK=true;
   (function(){var p=document.createElement("div");p.id="sync-pill";p.className="sync-pill";p.textContent="☁️ 同步中…";document.body.appendChild(p);})();
   cloudGet(function(remote){
+    /* ===== 硬删除：百度文库-博物馆 / 百度文库-小爆款（永久移除，任何合并都不复活） ===== */
+    (function(){
+      var cleaned=false;
+      S.projects=S.projects.filter(function(x){
+        if(x.name==="百度文库-博物馆"||x.name==="百度文库-小爆款"){ cleaned=true; return false; }
+        return true;
+      });
+      S.deleted=S.deleted||{};
+      var dp=S.deleted.projects||(S.deleted.projects=[]);
+      ["百度文库-博物馆","百度文库-小爆款"].forEach(function(n){ if(dp.indexOf(n)<0) dp.push(n); });
+      if(cleaned){ DB.s("projects",S.projects); DB.s("deleted",S.deleted); } /* 立即写 localStorage */
+    })();
+
     var hasRemote=remote&&STORE_KEYS.some(function(k){return Array.isArray(remote[k])&&remote[k].length});
     if(hasRemote){
       /* 云端有数据 → LWW 合并（本地优先，绝不删本地条目），再把合并结果回推云端做对账 */
@@ -1617,6 +1632,18 @@ if(location.protocol!=="file:"){
   });
 }else{
   REMOTE_OK=false;
+  /* 文件模式也做硬删除 */
+  (function(){
+    var cleaned=false;
+    S.projects=S.projects.filter(function(x){
+      if(x.name==="百度文库-博物馆"||x.name==="百度文库-小爆款"){ cleaned=true; return false; }
+      return true;
+    });
+    S.deleted=S.deleted||{};
+    var dp=S.deleted.projects||(S.deleted.projects=[]);
+    ["百度文库-博物馆","百度文库-小爆款"].forEach(function(n){ if(dp.indexOf(n)<0) dp.push(n); });
+    if(cleaned){ DB.s("projects",S.projects); DB.s("deleted",S.deleted); }
+  })();
   boot(); /* file:// 直接打开：纯本机模式 */
 }
 
