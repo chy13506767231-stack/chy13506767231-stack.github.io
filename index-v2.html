@@ -372,8 +372,9 @@ var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","revi
 var CLOUD={REPO:"chy13506767231-stack/chy13506767231-stack.github.io",FILE:"data.json",BRANCH:"main"};
 function cloudObj(){var o={};STORE_KEYS.forEach(function(k){o[k]=S[k]});return o}
 function cloudGet(cb){
-  /* 读取：走 raw.githubusercontent.com（公开仓库无需认证，无频率限制） */
-  fetch("https://raw.githubusercontent.com/"+CLOUD.REPO+"/"+CLOUD.BRANCH+"/"+CLOUD.FILE,{headers:{"User-Agent":"Mozilla/5.0"}})
+  /* 读取：走 GitHub Pages（同域名无跨域，国内可达）。
+     加 ?t= 时间戳破 CDN 缓存。 */
+  fetch("https://chy13506767231-stack.github.io/data.json?t="+Date.now(),{headers:{"User-Agent":"Mozilla/5.0"}})
     .then(function(r){return r.ok?r.json():null})
     .then(function(j){cb(j)})
     .catch(function(){cb(null)});
