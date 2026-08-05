@@ -1513,6 +1513,16 @@ function applyTombs(k, arr){
 function mergeLWW(remote){
   if(!remote)return false;
   var changed=false;
+  /* 先把「墓碑」从云端拉进本地（必须在下面数组循环用 applyTombs 过滤之前），
+     否则循环过滤时 S.deleted 还是空的、过滤失效 → 已删条目被复活 */
+  if(remote.deleted && typeof remote.deleted==="object"){
+    S.deleted=S.deleted||{};
+    Object.keys(remote.deleted).forEach(function(k2){
+      var rlist=remote.deleted[k2]||[];
+      var llist=S.deleted[k2]||(S.deleted[k2]=[]);
+      rlist.forEach(function(v){ if(llist.indexOf(v)<0){ llist.push(v); changed=true; } });
+    });
+  }
   STORE_KEYS.forEach(function(k){
     var rem=remote[k], loc=S[k];
     if(Array.isArray(rem) && Array.isArray(loc)){
@@ -1544,17 +1554,6 @@ function mergeLWW(remote){
   /* 手动排序偏好：整对象 LWW（按 manualTS 取较新一方，平局听云端真源） */
   if(remote.manualTS && remote.manualTS>=(S.manualTS||0)){
     S.manual=remote.manual||{}; S.manualTS=remote.manualTS||0; changed=true;
-  }
-  /* 墓碑对象合并：取「本地+云端」墓碑的并集（删除是单向积累，只会越来越多，并集最安全）。
-     必须单独处理：deleted 是对象不是数组，上面的数组合并分支不会碰它，否则云端墓碑拉不到本地、被同步冲掉 */
-  if(remote.deleted && typeof remote.deleted==="object"){
-    S.deleted=S.deleted||{};
-    Object.keys(remote.deleted).forEach(function(k2){
-      var rlist=remote.deleted[k2]||[];
-      var llist=S.deleted[k2]||(S.deleted[k2]=[]);
-      rlist.forEach(function(v){ if(llist.indexOf(v)<0) llist.push(v); });
-    });
-    changed=true;
   }
   return changed;
 }
