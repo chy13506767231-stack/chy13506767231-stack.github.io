@@ -1384,6 +1384,8 @@ function rv(){
       if(!confirm("确定删除该条目？"))return;
       tombstone("reviews", +b.dataset.rvDel);
       S.reviews=S.reviews.filter(function(x){return x.id!==+b.dataset.rvDel});S.save();rv();
+      /* 删除后立即强推云端（不等 debounce），确保墓碑第一时间覆盖 */
+      if(REMOTE_OK) cloudPut(cloudObj(), function(ok){ setSyncPill(ok?"☁️ 已同步云端":"📴 离线·本机"); });
     });
   });
 }
@@ -1444,6 +1446,8 @@ function rno(){
       if(!confirm("确定删除该笔记？"))return;
       tombstone("notes", +b.dataset.noDel);
       S.notes=S.notes.filter(function(x){return x.id!==+b.dataset.noDel});S.save();rno();
+      /* 删除后立即强推云端（不等 debounce），确保墓碑第一时间覆盖 */
+      if(REMOTE_OK) cloudPut(cloudObj(), function(ok){ setSyncPill(ok?"☁️ 已同步云端":"📴 离线·本机"); });
     });
   });
 }
