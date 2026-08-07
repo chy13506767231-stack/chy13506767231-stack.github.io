@@ -1713,7 +1713,7 @@ if(location.protocol!=="file:"){
       ["百度文库-博物馆","百度文库-小爆款"].forEach(function(n){ if(dp.indexOf(n)<0) dp.push(n); });
       if(cleaned){ DB.s("projects",S.projects); DB.s("deleted",S.deleted); } /* 立即写 localStorage */
     })();
-    /* ===== 一次性迁移：清空旧测试笔记（跨端标记，每次同步都检查） ===== */
+    /* ===== 一次性迁移：删除复盘结案里的旧测试条目 ===== */
     migrateClearReviews(remote);
 
     var hasRemote=remote&&STORE_KEYS.some(function(k){return Array.isArray(remote[k])&&remote[k].length});
