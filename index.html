@@ -1687,7 +1687,7 @@ function startSync(){
 function boot(){
   renderHeader();
   /* 版本标记：确认加载的是新版代码 */
-  (function(){var b=document.getElementById("ver-badge"); if(!b){b=document.createElement("div");b.id="ver-badge";b.style.cssText="position:fixed;bottom:10px;right:14px;font-size:10px;color:#b9c4d4;z-index:999;pointer-events:none";b.textContent="v250807-notes-cat";document.body.appendChild(b);}})();
+  (function(){var b=document.getElementById("ver-badge"); if(!b){b=document.createElement("div");b.id="ver-badge";b.style.cssText="position:fixed;bottom:10px;right:14px;font-size:10px;color:#b9c4d4;z-index:999;pointer-events:none";b.textContent="v250807-notes-clear";document.body.appendChild(b);}})();
   var h=(location.hash||"").replace(/^#/,"");
   if(h && TABS.indexOf(h)>=0) st(h);
   else st("overview");
