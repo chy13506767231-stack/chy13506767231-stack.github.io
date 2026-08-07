@@ -370,33 +370,7 @@ var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","revi
 /* 读取：raw.githubusercontent.com 免认证、无频率限制，所有设备可用。
    写入：Mac 端通过 serve.py /api/data 代理（免 PAT 暴露）；手机端只读，改动等 Mac 同步。 */
 var CLOUD={REPO:"chy13506767231-stack/chy13506767231-stack.github.io",FILE:"data.json",BRANCH:"main"};
-function cloudObj(){var o={};STORE_KEYS.forEach(function(k){o[k]=S[k]});if(S.reviewsCleared)o.reviewsCleared=true;return o}
-/* 一次性迁移：删除复盘结案里的旧测试条目（跨端同步标记，防旧标签页推回来）。
-   只删指定内容的复盘条目，不影响其他复盘和笔记。 */
-function migrateClearReviews(remote){
-  var cloudDone=remote&&remote.reviewsCleared;
-  var localDone=DB.g("reviewsCleared",false);
-  if(cloudDone||localDone){
-    /* 已标记 → 确保墓碑生效即可 */
-    if(!localDone) DB.s("reviewsCleared",true);
-    if(!S.reviewsCleared) S.reviewsCleared=true;
-    return;
-  }
-  /* 首次执行：匹配内容删除指定复盘条目 + 记墓碑 + 标记 + 推云端 */
-  var bad=["怦怦一夏X长隆","一般投流结束24小时回收数据","投流链路：资源包拿到","同城榜带地名"];
-  S.deleted=S.deleted||{};
-  var dr=S.deleted.reviews||(S.deleted.reviews=[]);
-  var before=(S.reviews||[]).length;
-  S.reviews=(S.reviews||[]).filter(function(r){
-    var t=(r.text||"")+"|"+(r.project||"")+"|"+(r.good||"")+"|"+(r.improve||"")+"|"+(r.reusable||"");
-    var match=bad.some(function(p){ return t.indexOf(p)>=0; });
-    if(match && dr.indexOf(r.id)<0) dr.push(r.id);
-    return !match;
-  });
-  if((S.reviews||[]).length<before){ DB.s("reviews",S.reviews); DB.s("deleted",S.deleted); }
-  DB.s("reviewsCleared",true);
-  S.reviewsCleared=true;
-}
+function cloudObj(){var o={};STORE_KEYS.forEach(function(k){o[k]=S[k]});return o}
 function cloudGet(cb){
   /* 读取：走 GitHub Pages（同域名无跨域，国内可达）。
      加 ?t= 时间戳破 CDN 缓存。 */
@@ -1665,7 +1639,6 @@ function syncPull(){
   syncing=true;
   cloudGet(function(remote){
     syncing=false;
-    migrateClearReviews(remote); /* 每次同步都检查复盘清除标记，防旧标签页推回来 */
     var changed=remote?mergeLWW(remote):false; /* 先按 LWW 合并云端改动（含你刚在手机改的） */
     S.save(true);
     cloudPut(cloudObj(),function(ok){ /* 把本地(含合并来的云端)整体回推 → 两端收敛一致 */
@@ -1717,9 +1690,6 @@ if(location.protocol!=="file:"){
       ["百度文库-博物馆","百度文库-小爆款"].forEach(function(n){ if(dp.indexOf(n)<0) dp.push(n); });
       if(cleaned){ DB.s("projects",S.projects); DB.s("deleted",S.deleted); } /* 立即写 localStorage */
     })();
-    /* ===== 一次性迁移：删除复盘结案里的旧测试条目 ===== */
-    migrateClearReviews(remote);
-
     var hasRemote=remote&&STORE_KEYS.some(function(k){return Array.isArray(remote[k])&&remote[k].length});
     if(hasRemote){
       /* 云端有数据 → LWW 合并（本地优先，绝不删本地条目），再把合并结果回推云端做对账 */
@@ -1747,8 +1717,6 @@ if(location.protocol!=="file:"){
     ["百度文库-博物馆","百度文库-小爆款"].forEach(function(n){ if(dp.indexOf(n)<0) dp.push(n); });
     if(cleaned){ DB.s("projects",S.projects); DB.s("deleted",S.deleted); }
   })();
-  /* 文件模式也执行一次性迁移 */
-  migrateClearReviews(null);
   boot(); /* file:// 直接打开：纯本机模式 */
 }
 
