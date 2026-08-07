@@ -409,7 +409,7 @@ var S={
   aitool:DB.g("aitool",[{id:1,name:"NotebookLM",url:"https://notebooklm.google.com/"},{id:2,name:"Notion 入门",url:"https://app.notion.com/p/Getting-Started-on-Mobile-57f65cb45cb64e25a693f79a04794564"},{id:3,name:"豆包",url:"https://www.doubao.com/chat/skills"}]),
   fun:DB.g("fun",[{id:1,name:"Threads",url:"https://www.threads.com/"},{id:2,name:"Instagram",url:"https://www.instagram.com/"},{id:3,name:"YouTube",url:"https://www.youtube.com/"}]),
   daily:DB.g("daily",[]),
-  manual:{}, manualTS:0,
+  manual:DB.g("manual",{}), manualTS:DB.g("manualTS",0),
   deleted:{},
   /* 墓碑机制：记录已删除条目的 mergeKey，跨设备同步后永不复活。
      S.deleted = { "projects": ["百度文库-博物馆"], "todos": [5], ... }
