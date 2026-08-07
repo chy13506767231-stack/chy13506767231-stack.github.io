@@ -354,7 +354,7 @@ textarea{resize:vertical;min-height:70px}
 
 <script>
 (function(){
-var SYNC_VERSION=1786080701;
+var SYNC_VERSION=1786103492;
 "use strict";
 
 /* ================= 数据层（沿用 wb16_ 前缀，原数据不丢失） ================= */
@@ -1197,6 +1197,7 @@ function tplModal(id){
 
 /* ================= 7. 重要文档管理 ================= */
 var idcat="all";
+var noCat="all";
 function rid(){
   var cats={};S.impdocs.forEach(function(d){cats[d.type]=(cats[d.type]||0)+1});
   var fds=idcat==="all"?S.impdocs:S.impdocs.filter(function(d){return d.type===idcat});
@@ -1327,15 +1328,18 @@ function previewFile(url,name){
 
 /* ================= 8. 复盘结案（项目复盘 + 历史反思 合并展示，按编辑顺序倒序：新编辑的在最上） ================= */
 function rv(){
-  var list=S.reviews.slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)});
-  var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-rv-btn">+ 新建复盘</button></div>';
+  /* 默认按编辑顺序倒序（新编辑的在最上）；手动拖拽后按 S.manual["reviews"] 覆盖 */
+  var arr=S.reviews.slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)});
+  var list=orderItems(arr,"reviews",function(r){return r.id});
+  var html='<div class="row row-between mb-12"><button class="btn btn-primary btn-sm" id="add-rv-btn">+ 新建复盘</button>'
+    +(S.reviews.length?'<button class="btn btn-sm" id="rv-reset" title="恢复为编辑顺序">↺ 重置排序</button>':'')+'</div>';
   html+=list.length?list.map(function(r){
     if(r.kind==="reflect"){
-      return '<div class="card"><div class="row row-between mb-8"><span class="badge badge-green">'+esc(r.date||"反思")+'</span>'
+      return '<div class="drag-item card" data-drag-id="'+r.id+'"><div class="row row-between mb-8"><span class="badge badge-green">'+esc(r.date||"反思")+'</span>'
         +'<div class="sh0"><button class="btn-ghost" data-rv-edit="'+r.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-rv-del="'+r.id+'">✕</button></div></div>'
         +'<div class="text-xs text-pre" style="line-height:1.8">'+esc(r.text||"")+'</div></div>';
     }
-    return '<div class="card"><div class="row row-between mb-8"><div style="font-weight:700;font-size:13px">'+esc(r.project||"")+'</div>'
+    return '<div class="drag-item card" data-drag-id="'+r.id+'"><div class="row row-between mb-8"><div style="font-weight:700;font-size:13px">'+esc(r.project||"")+'</div>'
       +'<div class="sh0"><button class="btn-ghost" data-rv-edit="'+r.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-rv-del="'+r.id+'">✕</button></div></div>'
       +'<div class="review-block review-good"><div class="rb-label">做得好</div><div class="text-pre">'+esc(r.good||"—")+'</div></div>'
       +'<div class="review-block review-improve"><div class="rb-label">可改进</div><div class="text-pre">'+esc(r.improve||"—")+'</div></div>'
@@ -1343,7 +1347,11 @@ function rv(){
       +'</div>';
   }).join(""):'<div class="empty">暂无复盘</div>';
   document.getElementById("pnl-review").innerHTML=html;
+  bindDrag("pnl-review","reviews");
   document.getElementById("add-rv-btn").addEventListener("click",function(){rvModal(null)});
+  if(document.getElementById("rv-reset"))document.getElementById("rv-reset").addEventListener("click",function(){
+    if(S.manual)S.manual["reviews"]=[];S.manualTS=Date.now();S.save();rv();toast("已恢复为编辑顺序");
+  });
   document.querySelectorAll("[data-rv-edit]").forEach(function(b){b.addEventListener("click",function(){rvModal(+b.dataset.rvEdit)})});
   document.querySelectorAll("[data-rv-del]").forEach(function(b){
     b.addEventListener("click",function(){
@@ -1380,17 +1388,30 @@ function rvModal(id){
   });
 }
 
-/* ================= 9. 木木酱の笔记（分类 + 记录内容，不显示时间，按编辑顺序倒序） ================= */
+/* ================= 9. 木木酱の笔记（按分类归纳 + 记录内容，不显示时间；分类子标签切换 + 手动拖拽排序） ================= */
 function rno(){
-  var list=(S.notes||[]).slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)});
-  var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-no-btn">+ 新建笔记</button></div>';
+  var notes=S.notes||[];
+  var cats={};notes.forEach(function(n){var c=n.category||"未分类";cats[c]=(cats[c]||0)+1});
+  var fds=noCat==="all"?notes:notes.filter(function(n){return (n.category||"未分类")===noCat});
+  /* 默认按编辑顺序倒序（新编辑的在最上）；手动拖拽后按 S.manual["notes"] 覆盖 */
+  var arr=fds.slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)});
+  var list=orderItems(arr,"notes",function(n){return n.id});
+  var html='<div class="cat-pills"><span class="cat-pill'+(noCat==="all"?" active":"")+'" data-nocat="all">全部('+notes.length+')</span>'
+    +Object.keys(cats).map(function(c){return '<span class="cat-pill'+(noCat===c?" active":"")+'" data-nocat="'+esc(c)+'">'+esc(c)+'('+cats[c]+')</span>'}).join("")+'</div>';
+  html+='<div class="row row-between mb-12"><button class="btn btn-primary btn-sm" id="add-no-btn">+ 新建笔记</button>'
+    +(notes.length?'<button class="btn btn-sm" id="no-reset" title="恢复为编辑顺序">↺ 重置排序</button>':'')+'</div>';
   html+=list.length?list.map(function(n){
-    return '<div class="card"><div class="row row-between mb-8"><span class="badge badge-pink">'+esc(n.category||"未分类")+'</span>'
+    return '<div class="drag-item card" data-drag-id="'+n.id+'"><div class="row row-between mb-8"><span class="badge badge-pink">'+esc(n.category||"未分类")+'</span>'
       +'<div class="sh0"><button class="btn-ghost" data-no-edit="'+n.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-no-del="'+n.id+'">✕</button></div></div>'
       +'<div class="text-xs text-pre" style="line-height:1.8">'+esc(n.content||"")+'</div></div>';
   }).join(""):'<div class="empty">暂无笔记，点上方「+ 新建笔记」记录要反复查看的知识</div>';
   document.getElementById("pnl-notes").innerHTML=html;
+  bindDrag("pnl-notes","notes");
+  document.querySelectorAll("[data-nocat]").forEach(function(b){b.addEventListener("click",function(){noCat=b.dataset.nocat;rno()})});
   document.getElementById("add-no-btn").addEventListener("click",function(){noModal(null)});
+  if(document.getElementById("no-reset"))document.getElementById("no-reset").addEventListener("click",function(){
+    if(S.manual)S.manual["notes"]=[];S.manualTS=Date.now();S.save();rno();toast("已恢复为编辑顺序");
+  });
   document.querySelectorAll("[data-no-edit]").forEach(function(b){b.addEventListener("click",function(){noModal(+b.dataset.noEdit)})});
   document.querySelectorAll("[data-no-del]").forEach(function(b){
     b.addEventListener("click",function(){
@@ -1640,7 +1661,7 @@ function startSync(){
 function boot(){
   renderHeader();
   /* 版本标记：确认加载的是新版代码 */
-  (function(){var b=document.getElementById("ver-badge"); if(!b){b=document.createElement("div");b.id="ver-badge";b.style.cssText="position:fixed;bottom:10px;right:14px;font-size:10px;color:#b9c4d4;z-index:999;pointer-events:none";b.textContent="v250805-hardfix";document.body.appendChild(b);}})();
+  (function(){var b=document.getElementById("ver-badge"); if(!b){b=document.createElement("div");b.id="ver-badge";b.style.cssText="position:fixed;bottom:10px;right:14px;font-size:10px;color:#b9c4d4;z-index:999;pointer-events:none";b.textContent="v250807-notes-cat";document.body.appendChild(b);}})();
   var h=(location.hash||"").replace(/^#/,"");
   if(h && TABS.indexOf(h)>=0) st(h);
   else st("overview");
