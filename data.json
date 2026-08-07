@@ -1,1 +1,15 @@
-{}
+{
+ "notes": [
+  {
+   "id": 1,
+   "category": "test",
+   "content": "sync test note"
+  }
+ ],
+ "manual": {
+  "notes": [
+   1
+  ]
+ },
+ "manualTS": 1786107298
+}
