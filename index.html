@@ -319,7 +319,7 @@ textarea{resize:vertical;min-height:70px}
   <button class="tab-btn" data-tab="templates">下单模板</button>
   <button class="tab-btn" data-tab="impdocs">重要文档管理</button>
   <button class="tab-btn" data-tab="review">复盘结案</button>
-  <button class="tab-btn" data-tab="reflect">木木酱の反思</button>
+  <button class="tab-btn" data-tab="notes">木木酱の笔记</button>
   <button class="tab-btn" data-tab="scripts">话术库</button>
   <button class="tab-btn" data-tab="aitool">AI TOOL</button>
   <button class="tab-btn tab-fun" data-tab="fun">🎮</button>
@@ -334,7 +334,7 @@ textarea{resize:vertical;min-height:70px}
   <div id="pnl-templates" class="theme-morandi" style="display:none"></div>
   <div id="pnl-impdocs" style="display:none"></div>
   <div id="pnl-review" style="display:none"></div>
-  <div id="pnl-reflect" style="display:none"></div>
+  <div id="pnl-notes" style="display:none"></div>
   <div id="pnl-scripts" style="display:none"></div>
   <div id="pnl-aitool" style="display:none"></div>
   <div id="pnl-fun" style="display:none"></div>
@@ -354,7 +354,7 @@ textarea{resize:vertical;min-height:70px}
 
 <script>
 (function(){
-var SYNC_VERSION=1785809168;
+var SYNC_VERSION=1786080701;
 "use strict";
 
 /* ================= 数据层（沿用 wb16_ 前缀，原数据不丢失） ================= */
@@ -364,7 +364,7 @@ var DB={
   s:function(k,v){localStorage.setItem(this.k(k),JSON.stringify(v))}
 };
 var SN=["资源包","推策划","推脚本","推视频","发布中","已发布","数据回收中","复盘"];
-var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","reviews","reflects","scripts","aitool","fun","daily","manual","manualTS","deleted"];
+var STORE_KEYS=["todos","projects","projdocs","news","templates","impdocs","reviews","notes","scripts","aitool","fun","daily","manual","manualTS","deleted"];
 
 /* ================= 云端存储（GitHub）：手机/电脑多设备共享同一份数据 ================= */
 /* 读取：raw.githubusercontent.com 免认证、无频率限制，所有设备可用。
@@ -403,7 +403,8 @@ var S={
   templates:DB.g("templates",[{id:1,cat:"MCN",dept:"MCN接单群",name:"下单模版",body:"【项目/品牌名】\n【商务】\n【商单诉求】\n【投放平台】\n【投放形式】\n【投放账号】\n【发布时间】\n【话题词+方向】\n【视频时长】\n【素材链接】\n【素材是否有版权/获得授权】\n【指令】\n【脚本交付方式】\n【备注】"},{id:2,cat:"MCN",dept:"MCN接单群",name:"后续指令模版",body:"【项目】\n【平台】\n【执行文档】\n【账号】\n【反馈】\n【指令】"},{id:3,cat:"投流",dept:"投流咨询群",name:"返链模板",body:"【客户主体】\n【项目类型】\n【产品类型】冲榜/保量/全案\n【项目名称】\n【销售名称】\n【发布类别】\n【是否真人】\n【特殊备注】\n【是否需要返投流截图】\n【合作秒数】\n【分发形式】\n【客户代投】\n【投流负责人】"},{id:4,cat:"投流",dept:"投流咨询群",name:"报备模版",body:"【客户主体】\n【商务】\n【项目类型】\n【项目名称】\n【发布类别】\n【特殊备注】\n【合作秒数】\n【分发形式】\n【客户代投】\n【投流负责人】\n+资源包截图"},{id:5,cat:"投流",dept:"投流咨询群",name:"咨询模版",body:"【项目名称】\n【执行时间】\n【项目品类】\n【项目背景】\n【项目类型】\n【项目KPI】\n【项目金额】\n【投流预算】\n【外部账号数量】\n【内部账号数量】\n【星图/水下数量】\n【授权情况】\n【反馈时间】"},{id:6,cat:"策划",dept:"策划下单群",name:"策划部下单模版",body:"【项目名称】\n【客户组-花名】\n【执行日期】\n【是否确认执行】\n【商务大名】\n【客户主体】\n【客户等级】\n【平台金额】\n【策划费占比】\n【提交时间】\n【项目内容】\n【项目需求】"},{id:7,cat:"策划",dept:"策划下单群",name:"MCN用策划需求模版",body:"【项目名称】\n【执行日期】\n【商务大名】\n【客户组-花名】\n【是否确认执行】\n【客户等级】\n【平台金额】\n【策划费占比】\n【提交时间】\n【项目内容】\n【项目需求】"},{id:8,cat:"媒介",dept:"媒介对接群",name:"拓新模版",body:"【项目信息是否可以对外】\n【下单时间】\n【商务】\n【项目名称】\n【客户主体】\n【平台】\n【预算范围】\n【账号数量】\n【账号类型】\n【粉丝量要求】\n【内容方向】\n【提词需求】\n【发布时间】\n【素材提供方】\n【备注】"}]),
   impdocs:DB.g("impdocs",[{id:1,type:"刊例",link:"https://hcnrhu5l3kr1.feishu.cn/wiki/P9RTwVYI2ioSedknYB9c2ZH3nCe",name:"会火刊例-2026年Q3"},{id:2,type:"销售政策",link:"https://hcnrhu5l3kr1.feishu.cn/wiki/B4Maw3m6Hi2HYhkRbAUcikhBnkw",name:"销售政策-2026年Q3"},{id:3,type:"协作流程",link:"https://my.feishu.cn/wiki/Go3lw5N5EiR0BukvrP4c6bfXnAg",name:"各部门跨部门协作流程"},{id:4,type:"MCN标准",link:"https://my.feishu.cn/wiki/Om1mwbFsIi7IQwk94dJcH8QEnsg",name:"MCN协作/接单标准"},{id:5,type:"销售学习",link:"https://vcn1s0k19p68.feishu.cn/wiki/LmIAwIW4iiwuUdk9h6acKn19nwh",name:"销售学习/散客报价/年框"},{id:6,type:"冲榜SOP",link:"https://my.feishu.cn/wiki/Dj8vw7MIaia80LkFv6ZcdVHCnze",name:"抖音基础冲榜流程"},{id:7,type:"冲榜SOP",link:"https://my.feishu.cn/wiki/ZaznwRvi4iba8TkySmLcVYA3nBb",name:"微博冲榜流程"},{id:8,type:"案例库",link:"https://my.feishu.cn/sheets/IwLBs5kczhRJiitF0bOc276Mnwf",name:"会火案例库"},{id:9,type:"学习",link:"https://my.feishu.cn/wiki/FlAXwAzCyiwTLNkhryCceJSnnMW",name:"行业基础认知"},{id:10,type:"数据",link:"https://my.feishu.cn/sheets/VgwssGnGZhpQFIte7r5cFgGBn0g",name:"新会火抖音矩阵"},{id:11,type:"业务标准",link:"https://my.feishu.cn/docx/ZWOod7Ga1oV0FNxX07VcxprSnhh",name:"整合型业务介绍及接单标准"},{id:12,type:"媒介",link:"https://my.feishu.cn/sheets/WMaTsYQKah3AvQtrJsTccNuEnne",name:"整合营销外部媒介库"},{id:13,type:"ERP",link:"https://scn2itzo1scb.feishu.cn/wiki/CRIBw7cqCif2rIkCrUlc82Agnxh",name:"新ERP用户操作手册"},{id:14,type:"ERP",link:"https://scn2itzo1scb.feishu.cn/wiki/QC8vw02lCiCuogksBrHcRtyInkh",name:"新ERP上线验收"},{id:15,type:"ERP",link:"https://tcnwpv88o2ir.feishu.cn/wiki/KeREwrpOBifiR8kJw3Hc1cVjnue",name:"新ERP录入订单手册"},{id:16,type:"媒介",link:"https://my.feishu.cn/wiki/XShKwDIVMivGMGkIDd0cgzYLnhc",name:"2026年媒介外部账号仪表盘"},{id:17,type:"联动文档",link:"https://my.feishu.cn/wiki/BmxpwyztnijEYlkrWzWcJEGNnrc",name:"工作台联动文档（刷新源）"}]),
   reviews:DB.g("reviews",[{id:1,project:"百度文库-WAIC",good:"节奏把控好,投流及时",improve:"审核需加checklist",reusable:"发布SOP可复用"},{id:2,project:"希尔X盈香心动花园",good:"策略详细,出词快",improve:"15分钟check",reusable:"同城榜策略可复用"}]),
-  reflects:DB.g("reflects",[{id:1,date:"7.29",text:"WAIC：视频审核漏掉错别字检查。加审核checklist"},{id:2,date:"7.28",text:"模版v1/v2区别：v1内部用含花名，v2给MCN去掉花名"},{id:3,date:"7.27",text:"冲榜复盘：同城榜带地名，种草榜刷小黄条"}]),
+  reflects:DB.g("reflects",[]),
+  notes:DB.g("notes",[]),
   scripts:DB.g("scripts",[{id:1,scene:"提词未通过",body:"告知非100%通过，同步多给推流冲万赞爆款"},{id:2,scene:"热度无涨幅",body:"前期等发酵，若仍无涨可能被限流"},{id:3,scene:"品牌露出",body:"前置告知风险，屏蔽限流不补发"},{id:4,scene:"冲榜客户要求品牌",body:"降露出比例，评论区自评+编辑tag置换"}]),
   aitool:DB.g("aitool",[{id:1,name:"NotebookLM",url:"https://notebooklm.google.com/"},{id:2,name:"Notion 入门",url:"https://app.notion.com/p/Getting-Started-on-Mobile-57f65cb45cb64e25a693f79a04794564"},{id:3,name:"豆包",url:"https://www.doubao.com/chat/skills"}]),
   fun:DB.g("fun",[{id:1,name:"Threads",url:"https://www.threads.com/"},{id:2,name:"Instagram",url:"https://www.instagram.com/"},{id:3,name:"YouTube",url:"https://www.youtube.com/"}]),
@@ -420,6 +421,22 @@ var S={
   save:function(){STORE_KEYS.forEach(function(k){DB.s(k,this[k])}.bind(this)); if(REMOTE_OK)cloudPut(cloudObj(),function(ok){setSyncPill(ok?"☁️ 已同步云端":"📴 离线·本机"); if(!ok)toast("云端同步失败，改动已保存在本机",3000)})},
   nid:function(l){return l.length?Math.max.apply(null,l.map(function(i){return i.id}))+1:1}
 };
+
+/* ================= 一次性迁移：木木酱の反思 → 并入「复盘结案」（合并为一个 tab） ================= */
+(function migrateReflectsToReviews(){
+  if(localStorage.getItem("wb16_mig_reflects_v1")) return;
+  var rf=S.reflects||[];
+  if(rf.length){
+    var nid=S.nid(S.reviews);
+    rf.forEach(function(r){
+      S.reviews.push({id:nid++,kind:"reflect",date:r.date||"",text:r.text||"",editedAt:parseDateMD(r.date),updatedAt:parseDateMD(r.date)});
+    });
+  }
+  S.reflects=[];
+  localStorage.setItem("wb16_mig_reflects_v1","1");
+  DB.s("reviews",S.reviews);
+  DB.s("reflects",[]);
+})();
 
 /* ================= 工具函数 ================= */
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
@@ -516,6 +533,7 @@ function copyText(text){
 }
 function dateKey(d){var m=String(d).match(/(\d+)\.(\d+)/);return m?(+m[1])*100+(+m[2]):0}
 function todayMD(){var n=new Date();return (n.getMonth()+1)+"."+n.getDate()}
+function parseDateMD(s){if(!s)return Date.now();var p=String(s).split(".");if(p.length>=2){var mo=parseInt(p[0],10),da=parseInt(p[1],10);if(mo>=1&&mo<=12&&da>=1&&da<=31){var d=new Date();d.setMonth(mo-1);d.setDate(da);d.setHours(12,0,0,0);return d.getTime();}}var t=Date.parse(s);return isNaN(t)?Date.now():t}
 
 var mbg=document.getElementById("modal-bg"),min=document.getElementById("modal-inner");
 function omod(h){min.innerHTML=h;mbg.style.display="flex";var md=document.querySelector(".modal");if(md)md.classList.remove("modal-wide")}
@@ -689,7 +707,7 @@ function refreshDaily(){
 }
 
 /* ================= Tab 切换 ================= */
-var TABS=["overview","todo","projects","projdocs","news","templates","impdocs","review","reflect","scripts","aitool","fun"];
+var TABS=["overview","todo","projects","projdocs","news","templates","impdocs","review","notes","scripts","aitool","fun"];
 var ct="overview";
 function st(t){
   ct=t;
@@ -1307,11 +1325,17 @@ function previewFile(url,name){
   }
 }
 
-/* ================= 8. 复盘结案（做得好 / 可改进 / 可复用 三段展示） ================= */
+/* ================= 8. 复盘结案（项目复盘 + 历史反思 合并展示，按编辑顺序倒序：新编辑的在最上） ================= */
 function rv(){
+  var list=S.reviews.slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)});
   var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-rv-btn">+ 新建复盘</button></div>';
-  html+=S.reviews.length?orderItems(S.reviews,"reviews",function(r){return r.id}).map(function(r){
-    return '<div class="drag-item card" data-drag-id="'+r.id+'"><div class="row row-between mb-8"><div style="font-weight:700;font-size:13px">'+esc(r.project)+'</div>'
+  html+=list.length?list.map(function(r){
+    if(r.kind==="reflect"){
+      return '<div class="card"><div class="row row-between mb-8"><span class="badge badge-green">'+esc(r.date||"反思")+'</span>'
+        +'<div class="sh0"><button class="btn-ghost" data-rv-edit="'+r.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-rv-del="'+r.id+'">✕</button></div></div>'
+        +'<div class="text-xs text-pre" style="line-height:1.8">'+esc(r.text||"")+'</div></div>';
+    }
+    return '<div class="card"><div class="row row-between mb-8"><div style="font-weight:700;font-size:13px">'+esc(r.project||"")+'</div>'
       +'<div class="sh0"><button class="btn-ghost" data-rv-edit="'+r.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-rv-del="'+r.id+'">✕</button></div></div>'
       +'<div class="review-block review-good"><div class="rb-label">做得好</div><div class="text-pre">'+esc(r.good||"—")+'</div></div>'
       +'<div class="review-block review-improve"><div class="rb-label">可改进</div><div class="text-pre">'+esc(r.improve||"—")+'</div></div>'
@@ -1319,12 +1343,11 @@ function rv(){
       +'</div>';
   }).join(""):'<div class="empty">暂无复盘</div>';
   document.getElementById("pnl-review").innerHTML=html;
-  bindDrag("pnl-review","reviews");
   document.getElementById("add-rv-btn").addEventListener("click",function(){rvModal(null)});
   document.querySelectorAll("[data-rv-edit]").forEach(function(b){b.addEventListener("click",function(){rvModal(+b.dataset.rvEdit)})});
   document.querySelectorAll("[data-rv-del]").forEach(function(b){
     b.addEventListener("click",function(){
-      if(!confirm("确定删除该复盘？"))return;
+      if(!confirm("确定删除该条目？"))return;
       tombstone("reviews", +b.dataset.rvDel);
       S.reviews=S.reviews.filter(function(x){return x.id!==+b.dataset.rvDel});S.save();rv();
     });
@@ -1332,48 +1355,62 @@ function rv(){
 }
 function rvModal(id){
   var r=id?S.reviews.find(function(x){return x.id===id}):null;
-  omod('<h3>'+(r?"编辑复盘":"新建复盘")+'</h3>'
-    +'<div class="fg"><label>项目</label><input id="rv-project" value="'+(r?esc(r.project):"")+'"></div>'
-    +'<div class="fg"><label>做得好</label><textarea id="rv-good" rows="2">'+(r?esc(r.good||""):"")+'</textarea></div>'
-    +'<div class="fg"><label>可改进</label><textarea id="rv-improve" rows="2">'+(r?esc(r.improve||""):"")+'</textarea></div>'
-    +'<div class="fg"><label>可复用</label><textarea id="rv-reusable" rows="2">'+(r?esc(r.reusable||""):"")+'</textarea></div>'
+  var isReflect=r&&r.kind==="reflect";
+  omod('<h3>'+(r?(isReflect?"编辑反思":"编辑复盘"):"新建复盘")+'</h3>'
+    + (isReflect
+      ? '<div class="fg"><label>日期</label><input id="rv-date" value="'+(r?esc(r.date):todayMD())+'"></div>'
+        +'<div class="fg"><label>内容</label><textarea id="rv-text" rows="6">'+(r?esc(r.text||""):"")+'</textarea></div>'
+      : '<div class="fg"><label>项目</label><input id="rv-project" value="'+(r?esc(r.project):"")+'"></div>'
+        +'<div class="fg"><label>做得好</label><textarea id="rv-good" rows="2">'+(r?esc(r.good||""):"")+'</textarea></div>'
+        +'<div class="fg"><label>可改进</label><textarea id="rv-improve" rows="2">'+(r?esc(r.improve||""):"")+'</textarea></div>'
+        +'<div class="fg"><label>可复用</label><textarea id="rv-reusable" rows="2">'+(r?esc(r.reusable||""):"")+'</textarea></div>')
     +'<div class="row row-end gap-4 mt-12"><button class="btn" id="rvc">取消</button><button class="btn btn-primary" id="rvs">保存</button></div>');
   bindModal("rvc","rvs",function(){
-    var p=document.getElementById("rv-project").value.trim();
-    if(!p){toast("请输入项目名称");return}
-    var data={project:p,good:document.getElementById("rv-good").value,improve:document.getElementById("rv-improve").value,reusable:document.getElementById("rv-reusable").value};
-    if(r){Object.assign(r,data)}else{data.id=S.nid(S.reviews);data.createdAt=new Date().toISOString();S.reviews.push(data)}
+    if(isReflect){
+      var d=document.getElementById("rv-date").value.trim(),t=document.getElementById("rv-text").value.trim();
+      if(!d||!t){toast("请填写完整");return}
+      if(r){r.date=d;r.text=t;r.editedAt=Date.now()}else{S.reviews.push({id:S.nid(S.reviews),kind:"reflect",date:d,text:t,editedAt:Date.now()})}
+    }else{
+      var p=document.getElementById("rv-project").value.trim();
+      if(!p){toast("请输入项目名称");return}
+      var data={project:p,good:document.getElementById("rv-good").value,improve:document.getElementById("rv-improve").value,reusable:document.getElementById("rv-reusable").value};
+      if(r){Object.assign(r,data);r.editedAt=Date.now()}else{data.id=S.nid(S.reviews);data.kind="review";data.editedAt=Date.now();S.reviews.push(data)}
+    }
     S.save();cmod();rv();
   });
 }
 
-/* ================= 9. 木木酱の反思 ================= */
-function rrf(){
-  var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-rf-btn">+ 记录反思</button></div>';
-  html+=S.reflects.length?orderItems(S.reflects,"reflects",function(r){return r.id}).map(function(r){
-    return '<div class="drag-item card" data-drag-id="'+r.id+'"><div class="row row-between mb-8"><span class="badge badge-green">'+esc(r.date)+'</span>'
-      +'<div class="sh0"><button class="btn-ghost" data-rf-edit="'+r.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-rf-del="'+r.id+'">✕</button></div></div>'
-      +'<div class="text-xs text-pre" style="line-height:1.8">'+esc(r.text)+'</div></div>';
-  }).join(""):'<div class="empty">暂无反思</div>';
-  document.getElementById("pnl-reflect").innerHTML=html;
-  bindDrag("pnl-reflect","reflects");
-  document.getElementById("add-rf-btn").addEventListener("click",function(){rfModal(null)});
-  document.querySelectorAll("[data-rf-edit]").forEach(function(b){b.addEventListener("click",function(){rfModal(+b.dataset.rfEdit)})});
-  document.querySelectorAll("[data-rf-del]").forEach(function(b){
-    b.addEventListener("click",function(){tombstone("reflects", +b.dataset.rfDel); S.reflects=S.reflects.filter(function(x){return x.id!==+b.dataset.rfDel});S.save();rrf()});
+/* ================= 9. 木木酱の笔记（分类 + 记录内容，不显示时间，按编辑顺序倒序） ================= */
+function rno(){
+  var list=(S.notes||[]).slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)});
+  var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-no-btn">+ 新建笔记</button></div>';
+  html+=list.length?list.map(function(n){
+    return '<div class="card"><div class="row row-between mb-8"><span class="badge badge-pink">'+esc(n.category||"未分类")+'</span>'
+      +'<div class="sh0"><button class="btn-ghost" data-no-edit="'+n.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-no-del="'+n.id+'">✕</button></div></div>'
+      +'<div class="text-xs text-pre" style="line-height:1.8">'+esc(n.content||"")+'</div></div>';
+  }).join(""):'<div class="empty">暂无笔记，点上方「+ 新建笔记」记录要反复查看的知识</div>';
+  document.getElementById("pnl-notes").innerHTML=html;
+  document.getElementById("add-no-btn").addEventListener("click",function(){noModal(null)});
+  document.querySelectorAll("[data-no-edit]").forEach(function(b){b.addEventListener("click",function(){noModal(+b.dataset.noEdit)})});
+  document.querySelectorAll("[data-no-del]").forEach(function(b){
+    b.addEventListener("click",function(){
+      if(!confirm("确定删除该笔记？"))return;
+      tombstone("notes", +b.dataset.noDel);
+      S.notes=S.notes.filter(function(x){return x.id!==+b.dataset.noDel});S.save();rno();
+    });
   });
 }
-function rfModal(id){
-  var r=id?S.reflects.find(function(x){return x.id===id}):null;
-  omod('<h3>'+(r?"编辑反思":"记录反思")+'</h3>'
-    +'<div class="fg"><label>日期</label><input id="rf-date" value="'+(r?esc(r.date):todayMD())+'"></div>'
-    +'<div class="fg"><label>内容</label><textarea id="rf-text" rows="6">'+(r?esc(r.text):"")+'</textarea></div>'
-    +'<div class="row row-end gap-4 mt-12"><button class="btn" id="rfc">取消</button><button class="btn btn-primary" id="rfs">保存</button></div>');
-  bindModal("rfc","rfs",function(){
-    var d=document.getElementById("rf-date").value.trim(),t=document.getElementById("rf-text").value.trim();
-    if(!d||!t){toast("请填写完整");return}
-    if(r){r.date=d;r.text=t}else{S.reflects.push({id:S.nid(S.reflects),date:d,text:t})}
-    S.save();cmod();rrf();
+function noModal(id){
+  var n=id?S.notes.find(function(x){return x.id===id}):null;
+  omod('<h3>'+(n?"编辑笔记":"新建笔记")+'</h3>'
+    +'<div class="fg"><label>分类</label><input id="no-cat" value="'+(n?esc(n.category):"")+'" placeholder="如：冲榜SOP / 话术 / 客户Q&A / 资料链接"></div>'
+    +'<div class="fg"><label>记录内容</label><textarea id="no-content" rows="6" placeholder="记录你学到的方法、要反复调用的话术或资料">'+(n?esc(n.content||""):"")+'</textarea></div>'
+    +'<div class="row row-end gap-4 mt-12"><button class="btn" id="noc">取消</button><button class="btn btn-primary" id="nos">保存</button></div>');
+  bindModal("noc","nos",function(){
+    var c=document.getElementById("no-cat").value.trim(),t=document.getElementById("no-content").value.trim();
+    if(!t){toast("请填写记录内容");return}
+    if(n){n.category=c;n.content=t;n.editedAt=Date.now()}else{S.notes.push({id:S.nid(S.notes),category:c,content:t,editedAt:Date.now()})}
+    S.save();cmod();rno();
   });
 }
 
@@ -1438,7 +1475,7 @@ document.getElementById("import-file").addEventListener("change",function(e){
 
 /* ================= 飞书联动文档同步 =================
    用户对 AI 说「刷新飞书文档」→ AI 读取飞书 wiki 并生成 feishu_sync.json → 点这里一键合并 */
-var SYNC_IDENTITY={todos:"text",projects:"name",projdocs:"project",news:"title",templates:"name",impdocs:"link",reviews:"project",reflects:"text",scripts:"scene"};
+var SYNC_IDENTITY={todos:"text",projects:"name",projdocs:"project",news:"title",templates:"name",impdocs:"link",reviews:"project",notes:"id",scripts:"scene"};
 document.getElementById("btn-sync-feishu").addEventListener("click",function(){
   fetch("feishu_sync.json").then(function(r){
     if(!r.ok)throw new Error("404");
@@ -1466,7 +1503,7 @@ document.getElementById("btn-sync-cloud").addEventListener("click",function(){
 });
 
 /* ================= 启动 ================= */
-var RENDER={overview:ro,todo:rt,projects:rp,projdocs:rpd,news:rn,templates:rtp,impdocs:rid,review:rv,reflect:rrf,scripts:rs,aitool:rai,fun:rfn};
+var RENDER={overview:ro,todo:rt,projects:rp,projdocs:rpd,news:rn,templates:rtp,impdocs:rid,review:rv,notes:rno,scripts:rs,aitool:rai,fun:rfn};
 /* 文件模式（file://）打开时给出醒目提示：fetch 会被浏览器拦截，热点/飞书功能不可用 */
 if(location.protocol==="file:"){
   var warnBar=document.createElement("div");
