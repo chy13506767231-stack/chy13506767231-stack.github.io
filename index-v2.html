@@ -449,6 +449,7 @@ function orderItems(arr,key,idFn){
   var known=[],unknown=[];
   arr.forEach(function(x){var id=idFn(x);(id in pos?known:unknown).push(x);});
   known.sort(function(a,b){return pos[idFn(a)]-pos[idFn(b)];});
+  if(key==="projects")return unknown.concat(known);
   return known.concat(unknown);
 }
 var _dragSrc=null;
@@ -719,7 +720,7 @@ document.querySelectorAll(".tab-btn").forEach(function(b){b.addEventListener("cl
 
 /* 统一阶段排序：以「项目进度」中的项目阶段为准，层级越低(stage 越小)越靠前；同阶段沿用 S.projects 原顺序 */
 function canonProjs(){
-  return S.projects.slice().sort(function(a,b){return (a.stage||0)-(b.stage||0)});
+  return S.projects.slice().sort(function(a,b){return (b.createdAt||b.id||0)-(a.createdAt||a.id||0)});
 }
 function projRank(name){
   var arr=canonProjs(),r=1e9;
@@ -863,7 +864,7 @@ function projModal(id){
     var n=document.getElementById("pj-name").value.trim();
     if(!n){toast("请输入项目名称");return}
     var data={name:n,client:document.getElementById("pj-client").value,amount:document.getElementById("pj-amount").value,kpi:document.getElementById("pj-kpi").value,stage:+document.getElementById("pj-stage").value,status:document.getElementById("pj-status").value,result:document.getElementById("pj-result").value.trim(),execTime:document.getElementById("pj-exectime").value.trim(),hotKw:document.getElementById("pj-hotkw").value.trim()};
-    if(p){Object.assign(p,data)}else{data.id=S.nid(S.projects);S.projects.push(data)}
+    if(p){Object.assign(p,data)}else{data.id=S.nid(S.projects);data.createdAt=Date.now();S.projects.push(data)}
     S.save();cmod();renderHeader();rp();
   });
 }
