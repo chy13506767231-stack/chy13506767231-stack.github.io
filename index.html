@@ -410,7 +410,7 @@ var S={
   fun:DB.g("fun",[{id:1,name:"Threads",url:"https://www.threads.com/"},{id:2,name:"Instagram",url:"https://www.instagram.com/"},{id:3,name:"YouTube",url:"https://www.youtube.com/"}]),
   daily:DB.g("daily",[]),
   manual:DB.g("manual",{}), manualTS:DB.g("manualTS",0),
-  deleted:{},
+  deleted:DB.g("deleted",{}),
   /* 墓碑机制：记录已删除条目的 mergeKey，跨设备同步后永不复活。
      S.deleted = { "projects": ["百度文库-博物馆"], "todos": [5], ... }
      每次 delete 操作都会把被删条目的 key 写入此对象，随 JSONBin 同步到所有端。
