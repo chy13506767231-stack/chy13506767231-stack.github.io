@@ -988,7 +988,9 @@ function rn(){
     finalOrder.forEach(function(pn){
       var items=byProj[pn]||[];
       html+='<section class="news-project"><h3 class="news-proj-title"><span class="news-proj-chip">'+esc(pn)
-        +'</span> <span class="news-proj-count">'+items.length+' 条</span></h3>';
+        +'</span> <span class="news-proj-count">'+items.length+' 条</span>'
+        +(items.length?' <button class="btn-ghost btn-ghost-danger" data-nw-clear="'+esc(pn)+'" title="清空该项目下所有热点">🗑 清空</button>':'')
+        +'</h3>';
       if(!items.length){
         html+='<div class="text-xs" style="color:var(--muted);margin:2px 0 6px">监测中 · 暂无命中（可在项目里填「抓取关键词」提高命中率）</div>';
       } else {
@@ -1031,6 +1033,17 @@ function rn(){
   });
   document.getElementById("import-hot-btn").addEventListener("click",importHot);
   document.getElementById("monitor-btn").addEventListener("click",runMonitor);
+  document.querySelectorAll("[data-nw-clear]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var pn=b.dataset.nwClear;
+      if(!confirm("确认清空「"+pn+"」下的所有热点？\n（项目本身仍在「项目进度」中；若该项目仍填了抓取关键词，下次导入抓取热点会重新生成）"))return;
+      var ids=S.news.filter(function(n){return (pn==="通用热点")?(n.project||"通用热点")===pn:n.project===pn}).map(function(n){return n.id});
+      if(!ids.length)return;
+      ids.forEach(function(id){tombstone("news",id)});
+      S.news=S.news.filter(function(n){return ids.indexOf(n.id)<0});
+      S.save();rn();
+    });
+  });
 }
 function newsModal(id){
   var n=id?S.news.find(function(x){return x.id===id}):null;
