@@ -989,7 +989,7 @@ function rn(){
       var items=byProj[pn]||[];
       html+='<section class="news-project"><h3 class="news-proj-title"><span class="news-proj-chip">'+esc(pn)
         +'</span> <span class="news-proj-count">'+items.length+' 条</span>'
-        +(items.length?' <button class="btn-ghost btn-ghost-danger" data-nw-clear="'+esc(pn)+'" title="清空该项目下所有热点">🗑 清空</button>':'')
+        +' <button class="btn-ghost btn-ghost-danger" data-nw-clear="'+esc(pn)+'" title="清空/移除该项目热点">🗑 清空</button>'
         +'</h3>';
       if(!items.length){
         html+='<div class="text-xs" style="color:var(--muted);margin:2px 0 6px">监测中 · 暂无命中（可在项目里填「抓取关键词」提高命中率）</div>';
@@ -1036,9 +1036,12 @@ function rn(){
   document.querySelectorAll("[data-nw-clear]").forEach(function(b){
     b.addEventListener("click",function(){
       var pn=b.dataset.nwClear;
-      if(!confirm("确认清空「"+pn+"」下的所有热点？\n（项目本身仍在「项目进度」中；若该项目仍填了抓取关键词，下次导入抓取热点会重新生成）"))return;
+      var cnt=S.news.filter(function(n){return (pn==="通用热点")?(n.project||"通用热点")===pn:n.project===pn}).length;
+      var msg=cnt>0
+        ?"确认清空「"+pn+"」下的 "+cnt+" 条热点？\n（项目本身仍在「项目进度」中；若该项目仍填了抓取关键词，下次导入抓取热点会重新生成）"
+        :"确认移除「"+pn+"」的热点监控？\n（项目本身仍在「项目进度」中；若该项目仍填了抓取关键词，下次导入抓取热点会重新出现）";
+      if(!confirm(msg))return;
       var ids=S.news.filter(function(n){return (pn==="通用热点")?(n.project||"通用热点")===pn:n.project===pn}).map(function(n){return n.id});
-      if(!ids.length)return;
       ids.forEach(function(id){tombstone("news",id)});
       S.news=S.news.filter(function(n){return ids.indexOf(n.id)<0});
       S.save();rn();
