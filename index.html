@@ -1747,6 +1747,101 @@ if(location.protocol!=="file:"){
 function rai(){ renderLinks("pnl-aitool","aitool",S.aitool,{addLabel:"+ 添加工具",subtitle:"常用 AI / 效率工具，点名称下方的链接直接打开"}) }
 /* ================= 12. 🎮 休闲娱乐区（俏皮风） ================= */
 function rfn(){ renderLinks("pnl-fun","fun",S.fun,{addLabel:"+ 添加好玩的",subtitle:"木木酱の摸鱼区 · 劳逸要结合～ 点卡片直接打开",fun:true}) }
+
+/* ================= 13. hello AI（外接大模型 · 页面内对话） ================= */
+function rhaic(){
+  var p=document.getElementById("pnl-helloai"); if(!p)return;
+  if(!window._ai) window._ai={chat:DB.g("aichat",[]),streaming:false};
+  var cfg=DB.g("aicfg",{});
+  var PRESETS={
+    "DeepSeek":"https://api.deepseek.com/v1|deepseek-chat",
+    "通义千问":"https://dashscope.aliyuncs.com/compatible-mode/v1|qwen-plus",
+    "月之暗面 Kimi":"https://api.moonshot.cn/v1|moonshot-v1-8k",
+    "OpenAI":"https://api.openai.com/v1|gpt-4o-mini"
+  };
+  function renderMsgs(){
+    var box=document.getElementById("ai-msgs"); if(!box)return;
+    if(!window._ai.chat.length){ box.innerHTML='<div class="ai-hint">还没有对话～ 先在上方填好 API 配置并保存，然后在这里开始聊。可让它帮你写文案、写复盘、梳理资料、答疑。</div>'; return; }
+    var h="";
+    window._ai.chat.forEach(function(m){
+      var who=m.role==="user"?"user":"assistant";
+      h+='<div class="ai-msg '+who+'"><div class="ai-bubble">'+esc(m.content||"")+'</div></div>';
+    });
+    box.innerHTML=h; box.scrollTop=box.scrollHeight;
+  }
+  function buildContext(){
+    var s=["【项目进度】"];
+    (S.projects||[]).forEach(function(pr){ s.push("- "+pr.name+"（客户:"+(pr.client||"-")+"，状态:"+(pr.status||"-")+(pr.result?"，成果:"+pr.result:"")+"）"); });
+    s.push("【木木酱の笔记】");
+    (S.notes||[]).forEach(function(n){ s.push("- ["+(n.category||"-")+"] "+n.content); });
+    return s.join("\n");
+  }
+  function send(){
+    if(window._ai.streaming) return;
+    var inp=document.getElementById("ai-input"); var msg=inp.value.trim(); if(!msg)return;
+    var c=DB.g("aicfg",{});
+    if(!c.base||!c.key){ toast("请先在上方「API 配置」填写 Base 地址和 Key 并保存",3500); return; }
+    window._ai.chat.push({role:"user",content:msg}); inp.value=""; renderMsgs();
+    var sys="你是木木酱的 AI 工作助手，语气亲切、专业、用中文回答。";
+    if(c.ctx!==false){ sys+="\n\n以下是木木酱工作台当前数据摘要（仅作上下文参考，涉及客户/金额等请保持谨慎）：\n"+buildContext(); }
+    var messages=[{role:"system",content:sys}].concat(window._ai.chat.map(function(m){return {role:m.role,content:m.content};}));
+    window._ai.chat.push({role:"assistant",content:""}); renderMsgs();
+    window._ai.streaming=true;
+    fetch((c.base||"").replace(/\/$/,"")+"/chat/completions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},
+      body:JSON.stringify({model:c.model||"deepseek-chat",messages:messages,stream:true})
+    }).then(function(r){
+      if(!r.ok) return r.text().then(function(t){throw new Error("HTTP "+r.status+" "+t.slice(0,160))});
+      var reader=r.body.getReader(),dec=new TextDecoder(),buf="",full="";
+      function pump(){
+        return reader.read().then(function(res){
+          if(res.done){ window._ai.streaming=false; DB.s("aichat",window._ai.chat); return; }
+          buf+=dec.decode(res.value,{stream:true});
+          var lines=buf.split("\n"); buf=lines.pop();
+          for(var i=0;i<lines.length;i++){ var line=lines[i].trim(); if(line.indexOf("data:")!==0)continue; var d=line.slice(5).trim(); if(d==="[DONE]")continue;
+            try{ var j=JSON.parse(d); var dl=j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content; if(dl){ full+=dl; window._ai.chat[window._ai.chat.length-1].content=full; renderMsgs(); } }catch(e){}
+          }
+          return pump();
+        });
+      }
+      pump();
+    }).catch(function(e){
+      window._ai.streaming=false;
+      var err="\n\n[调用失败] "+e.message+"\n（若为 CORS 跨域错误，请改用支持跨域的国内厂商如 DeepSeek / 通义 / Kimi，或在 Mac 端改用本地代理）";
+      window._ai.chat[window._ai.chat.length-1].content=err; renderMsgs(); DB.s("aichat",window._ai.chat);
+    });
+  }
+  var presetHtml="";
+  Object.keys(PRESETS).forEach(function(k){ presetHtml+='<button type="button" class="ai-preset" data-pre="'+k+'">'+k+'</button>'; });
+  p.innerHTML=
+    '<div class="ai-set">'+
+      '<div style="font-weight:700;color:var(--blue3);margin-bottom:6px">⚙️ API 配置（OpenAI 兼容，仅存本机浏览器）</div>'+
+      '<div class="row"><label>Base 地址</label><input id="ai-base" placeholder="https://api.deepseek.com/v1" value="'+esc(cfg.base||"")+'"></div>'+
+      '<div class="row"><label>API Key</label><input id="ai-key" type="password" placeholder="sk-..." value="'+esc(cfg.key||"")+'"></div>'+
+      '<div class="row"><label>模型名</label><input id="ai-model" placeholder="deepseek-chat" value="'+esc(cfg.model||"")+'"></div>'+
+      '<div class="row"><span style="font-size:12px;color:var(--muted)">快捷填入：</span>'+presetHtml+'</div>'+
+      '<div class="row"><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ai-ctx" '+(cfg.ctx!==false?"checked":"")+'> 带上工作台数据（项目/笔记）做上下文</label></div>'+
+      '<div class="row"><button type="button" class="btn btn-sm" id="ai-save">保存配置</button><span class="ai-hint" id="ai-savehint"></span></div>'+
+    '</div>'+
+    '<div class="ai-msgs" id="ai-msgs"></div>'+
+    '<div class="ai-input">'+
+      '<textarea id="ai-input" placeholder="问点什么～ 例如：帮我把「怦怦一夏X横琴长隆」项目写成一段复盘文案"></textarea>'+
+      '<button type="button" id="ai-send">发送</button>'+
+      '<button type="button" class="ghost" id="ai-clear">清空</button>'+
+    '</div>';
+  document.getElementById("ai-save").addEventListener("click",function(){
+    var nc={base:document.getElementById("ai-base").value.trim(),key:document.getElementById("ai-key").value.trim(),model:document.getElementById("ai-model").value.trim()||"deepseek-chat",ctx:document.getElementById("ai-ctx").checked};
+    DB.s("aicfg",nc); var h=document.getElementById("ai-savehint"); if(h){h.textContent="✅ 已保存（仅存本机）"; setTimeout(function(){if(h)h.textContent="";},2500);}
+  });
+  document.querySelectorAll("[data-pre]").forEach(function(b){ b.addEventListener("click",function(){
+    var v=PRESETS[b.dataset.pre].split("|"); document.getElementById("ai-base").value=v[0]; document.getElementById("ai-model").value=v[1];
+  }); });
+  document.getElementById("ai-send").addEventListener("click",send);
+  document.getElementById("ai-input").addEventListener("keydown",function(e){ if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();send();} });
+  document.getElementById("ai-clear").addEventListener("click",function(){ if(!confirm("确认清空当前对话？（配置保留）"))return; window._ai.chat=[]; DB.s("aichat",[]); renderMsgs(); });
+  renderMsgs();
+}
 /* ================= 通用：链接快捷入口渲染 + 添加/编辑 ================= */
 function hostOf(u){ try{ return new URL(u).host.replace(/^www\./,"") }catch(e){ return u } }
 function favHtml(u){
