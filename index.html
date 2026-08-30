@@ -1897,22 +1897,23 @@ function rhaic(){
       +'<div class="row"><button type="button" class="btn btn-sm" id="ai-save">保存 / 更新此 API</button><span class="ai-hint" id="ai-savehint"></span></div>'
       +'</div>';
   }
-  p.innerHTML=
-    '<div class="ai-bar">'
-      +'<span class="ai-bar-title">💬 hello AI</span>'
-      +'<select id="ai-model-sel" class="ai-sel" title="切换模型（选择已配置的 API）">'+selOpts+'</select>'
-      +'<button type="button" class="ai-cfg-toggle" id="ai-cfg-toggle">⚙️ 配置</button>'
-    '</div>'
-    +'<div class="ai-msgs" id="ai-msgs"></div>'
-    +'<div class="ai-input">'
-      +'<textarea id="ai-input" placeholder="问点什么～ 例如：帮我把「怦怦一夏X横琴长隆」项目写成一段复盘文案"></textarea>'
-      +'<button type="button" id="ai-send">发送</button>'
-      +'<button type="button" class="ghost" id="ai-clear">清空</button>'
-    '</div>'
-    +'<div class="ai-set'+(window._ai.collapsed?' collapsed':'')+'">'
-      +'<div class="ai-set-head" id="ai-set-head"><span>⚙️ API 配置（OpenAI 兼容，仅存本机）</span><span class="ai-chev">'+(window._ai.collapsed?'▸':'▾')+'</span></div>'
-      +'<div class="ai-set-body">'+cfgBody+'</div>'
+  var html=
+    '<div class="ai-bar">'+
+      '<span class="ai-bar-title">💬 hello AI</span>'+
+      '<select id="ai-model-sel" class="ai-sel" title="切换模型（选择已配置的 API）">'+selOpts+'</select>'+
+      '<button type="button" class="ai-cfg-toggle" id="ai-cfg-toggle">⚙️ 配置</button>'+
+    '</div>'+
+    '<div class="ai-msgs" id="ai-msgs"></div>'+
+    '<div class="ai-input">'+
+      '<textarea id="ai-input" placeholder="问点什么～ 例如：帮我把「怦怦一夏X横琴长隆」项目写成一段复盘文案"></textarea>'+
+      '<button type="button" id="ai-send">发送</button>'+
+      '<button type="button" class="ghost" id="ai-clear">清空</button>'+
+    '</div>'+
+    '<div class="ai-set'+(window._ai.collapsed?' collapsed':'')+'">'+
+      '<div class="ai-set-head" id="ai-set-head"><span>⚙️ API 配置（OpenAI 兼容，仅存本机）</span><span class="ai-chev">'+(window._ai.collapsed?'▸':'▾')+'</span></div>'+
+      '<div class="ai-set-body">'+cfgBody+'</div>'+
     '</div>';
+  p.innerHTML=html;
   renderMsgs();
   function _on(id,ev,fn){ var el=document.getElementById(id); if(el) el.addEventListener(ev,fn); }
   _on("ai-model-sel","change",function(e){ window._ai.active=+e.target.value||null; if(window._ai.active)DB.s("aiactive",window._ai.active); rhaic(); });
