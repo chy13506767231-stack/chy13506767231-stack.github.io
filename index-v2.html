@@ -1914,12 +1914,13 @@ function rhaic(){
       +'<div class="ai-set-body">'+cfgBody+'</div>'
     '</div>';
   renderMsgs();
-  document.getElementById("ai-model-sel").addEventListener("change",function(e){ window._ai.active=+e.target.value||null; if(window._ai.active)DB.s("aiactive",window._ai.active); rhaic(); });
-  document.getElementById("ai-cfg-toggle").addEventListener("click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
-  document.getElementById("ai-set-head").addEventListener("click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
-  document.getElementById("ai-send").addEventListener("click",send);
-  document.getElementById("ai-input").addEventListener("keydown",function(e){ if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();send();} });
-  document.getElementById("ai-clear").addEventListener("click",function(){ if(!confirm("确认清空当前对话？（配置保留）"))return; window._ai.chat=[]; DB.s("aichat",[]); renderMsgs(); });
+  function _on(id,ev,fn){ var el=document.getElementById(id); if(el) el.addEventListener(ev,fn); }
+  _on("ai-model-sel","change",function(e){ window._ai.active=+e.target.value||null; if(window._ai.active)DB.s("aiactive",window._ai.active); rhaic(); });
+  _on("ai-cfg-toggle","click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
+  _on("ai-set-head","click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
+  _on("ai-send","click",send);
+  _on("ai-input","keydown",function(e){ if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();send();} });
+  _on("ai-clear","click",function(){ if(!confirm("确认清空当前对话？（配置保留）"))return; window._ai.chat=[]; DB.s("aichat",[]); renderMsgs(); });
   document.querySelectorAll("[data-pre]").forEach(function(b){ b.addEventListener("click",function(){
     var v=PRESETS[b.dataset.pre].split("|"); document.getElementById("ai-base").value=v[0]; document.getElementById("ai-model").value=v[1];
     if(!document.getElementById("ai-name").value) document.getElementById("ai-name").value=b.dataset.pre;
@@ -1952,6 +1953,7 @@ function rhaic(){
     var h=document.getElementById("ai-savehint"); if(h){h.textContent="✅ 已保存"; setTimeout(function(){if(h)h.textContent="";},2500);}
     rhaic();
   });
+  }
 }
 /* ================= 通用：链接快捷入口渲染 + 添加/编辑 ================= */
 function hostOf(u){ try{ return new URL(u).host.replace(/^www\./,"") }catch(e){ return u } }
