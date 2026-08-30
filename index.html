@@ -322,6 +322,7 @@ textarea{resize:vertical;min-height:70px}
   <button class="tab-btn" data-tab="notes">木木酱の笔记</button>
   <button class="tab-btn" data-tab="scripts">话术库</button>
   <button class="tab-btn" data-tab="aitool">AI TOOL</button>
+  <button class="tab-btn" data-tab="helloai">hello AI</button>
   <button class="tab-btn tab-fun" data-tab="fun">🎮</button>
 </div>
 
@@ -337,6 +338,7 @@ textarea{resize:vertical;min-height:70px}
   <div id="pnl-notes" style="display:none"></div>
   <div id="pnl-scripts" style="display:none"></div>
   <div id="pnl-aitool" style="display:none"></div>
+  <div id="pnl-helloai" style="display:none"></div>
   <div id="pnl-fun" style="display:none"></div>
 </div>
 
@@ -708,7 +710,7 @@ function refreshDaily(){
 }
 
 /* ================= Tab 切换 ================= */
-var TABS=["overview","todo","projects","projdocs","news","templates","impdocs","review","notes","scripts","aitool","fun"];
+var TABS=["overview","todo","projects","projdocs","news","templates","impdocs","review","notes","scripts","aitool","helloai","fun"];
 var ct="overview";
 function st(t){
   ct=t;
@@ -1549,7 +1551,7 @@ document.getElementById("btn-sync-cloud").addEventListener("click",function(){
 });
 
 /* ================= 启动 ================= */
-var RENDER={overview:ro,todo:rt,projects:rp,projdocs:rpd,news:rn,templates:rtp,impdocs:rid,review:rv,notes:rno,scripts:rs,aitool:rai,fun:rfn};
+var RENDER={overview:ro,todo:rt,projects:rp,projdocs:rpd,news:rn,templates:rtp,impdocs:rid,review:rv,notes:rno,scripts:rs,aitool:rai,helloai:rhaic,fun:rfn};
 /* 文件模式（file://）打开时给出醒目提示：fetch 会被浏览器拦截，热点/飞书功能不可用 */
 if(location.protocol==="file:"){
   var warnBar=document.createElement("div");
