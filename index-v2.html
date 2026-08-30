@@ -1772,24 +1772,21 @@ function rfn(){ renderLinks("pnl-fun","fun",S.fun,{addLabel:"+ 添加好玩的",
 /* ================= 13. hello AI（外接大模型 · 页面内对话） ================= */
 function rhaic(){
   var p=document.getElementById("pnl-helloai"); if(!p)return;
-  if(!window._ai) window._ai={chat:DB.g("aichat",[]),streaming:false};
-  var cfg=DB.g("aicfg",{});
+  if(!window._ai) window._ai={chat:DB.g("aichat",[]),streaming:false,active:DB.g("aiactive",null),collapsed:DB.g("aicollapsed",true),editId:null};
+  // 迁移旧的单配置（aicfg）为数组（aicfgs）
+  var cfgs=DB.g("aicfgs",null);
+  if(cfgs===null){
+    var old=DB.g("aicfg",null);
+    cfgs=(old&&old.base)?[{id:Date.now(),name:"我的 API",base:old.base,key:old.key,model:old.model||"deepseek-chat",ctx:old.ctx!==false}]:[];
+    DB.s("aicfgs",cfgs);
+  }
   var PRESETS={
     "DeepSeek":"https://api.deepseek.com/v1|deepseek-chat",
     "通义千问":"https://dashscope.aliyuncs.com/compatible-mode/v1|qwen-plus",
     "月之暗面 Kimi":"https://api.moonshot.cn/v1|moonshot-v1-8k",
     "OpenAI":"https://api.openai.com/v1|gpt-4o-mini"
   };
-  function renderMsgs(){
-    var box=document.getElementById("ai-msgs"); if(!box)return;
-    if(!window._ai.chat.length){ box.innerHTML='<div class="ai-hint">还没有对话～ 先在上方填好 API 配置并保存，然后在这里开始聊。可让它帮你写文案、写复盘、梳理资料、答疑。</div>'; return; }
-    var h="";
-    window._ai.chat.forEach(function(m){
-      var who=m.role==="user"?"user":"assistant";
-      h+='<div class="ai-msg '+who+'"><div class="ai-bubble">'+esc(m.content||"")+'</div></div>';
-    });
-    box.innerHTML=h; box.scrollTop=box.scrollHeight;
-  }
+  function getActive(){ return cfgs.filter(function(c){return c.id===window._ai.active})[0]||null; }
   function buildContext(){
     var s=["【项目进度】"];
     (S.projects||[]).forEach(function(pr){ s.push("- "+pr.name+"（客户:"+(pr.client||"-")+"，状态:"+(pr.status||"-")+(pr.result?"，成果:"+pr.result:"")+"）"); });
@@ -1797,11 +1794,21 @@ function rhaic(){
     (S.notes||[]).forEach(function(n){ s.push("- ["+(n.category||"-")+"] "+n.content); });
     return s.join("\n");
   }
+  function renderMsgs(){
+    var box=document.getElementById("ai-msgs"); if(!box)return;
+    if(!window._ai.chat.length){ box.innerHTML='<div class="ai-hint">还没有对话～ 先在右下角「⚙️ 配置」里添加一个 API 并选用，然后在这里开始聊。可让它帮你写文案、写复盘、梳理资料、答疑。</div>'; return; }
+    var h="";
+    window._ai.chat.forEach(function(m){
+      var who=m.role==="user"?"user":"assistant";
+      h+='<div class="ai-msg '+who+'"><div class="ai-bubble">'+esc(m.content||"")+'</div></div>';
+    });
+    box.innerHTML=h; box.scrollTop=box.scrollHeight;
+  }
   function send(){
     if(window._ai.streaming) return;
     var inp=document.getElementById("ai-input"); var msg=inp.value.trim(); if(!msg)return;
-    var c=DB.g("aicfg",{});
-    if(!c.base||!c.key){ toast("请先在上方「API 配置」填写 Base 地址和 Key 并保存",3500); return; }
+    var c=getActive();
+    if(!c||!c.base||!c.key){ toast("请先在右下角「⚙️ 配置」里添加并选用一个 API",3500); return; }
     window._ai.chat.push({role:"user",content:msg}); inp.value=""; renderMsgs();
     var sys="你是木木酱的 AI 工作助手，语气亲切、专业、用中文回答。";
     if(c.ctx!==false){ sys+="\n\n以下是木木酱工作台当前数据摘要（仅作上下文参考，涉及客户/金额等请保持谨慎）：\n"+buildContext(); }
@@ -1833,35 +1840,96 @@ function rhaic(){
       window._ai.chat[window._ai.chat.length-1].content=err; renderMsgs(); DB.s("aichat",window._ai.chat);
     });
   }
-  var presetHtml="";
-  Object.keys(PRESETS).forEach(function(k){ presetHtml+='<button type="button" class="ai-preset" data-pre="'+k+'">'+k+'</button>'; });
+  var active=getActive();
+  var selOpts='<option value="">＋ 添加 / 管理 API</option>';
+  cfgs.forEach(function(c){ selOpts+='<option value="'+c.id+'"'+(c.id===window._ai.active?' selected':'')+'>'+esc(c.name||"未命名")+' · '+(c.model||"")+'</option>'; });
+  var cfgBody="";
+  if(window._ai.collapsed){
+    cfgBody='<div class="ai-cfg-collapsed">已配置 '+cfgs.length+' 个 API'+(active?(' · 当前：'+esc(active.name||"")+'（'+esc(active.model||"")+'）'):' · 未选择，点 ⚙️ 展开配置')+'</div>';
+  } else {
+    if(cfgs.length){
+      cfgBody+='<div class="ai-cfg-list">';
+      cfgs.forEach(function(c){
+        cfgBody+='<div class="ai-cfg-item'+(c.id===window._ai.active?' active':'')+'">'
+          +'<div class="ai-cfg-meta"><b>'+esc(c.name||"未命名")+'</b><span>'+esc(c.model||"")+'</span>'+(c.ctx!==false?'<span class="ai-cfg-tag">带上下文</span>':'')+'</div>'
+          +'<div class="ai-cfg-acts">'
+          +(c.id!==window._ai.active?'<button type="button" class="btn-ghost" data-use="'+c.id+'">选用</button>':'<span class="ai-cur">✓ 当前</span>')
+          +'<button type="button" class="btn-ghost" data-edit="'+c.id+'">编辑</button>'
+          +'<button type="button" class="btn-ghost btn-ghost-danger" data-delcfg="'+c.id+'">✕</button>'
+          +'</div></div>';
+      });
+      cfgBody+='</div>';
+    } else {
+      cfgBody+='<div class="ai-hint">还没有配置任何 API，下面添加第一个～</div>';
+    }
+    var presetHtml="";
+    Object.keys(PRESETS).forEach(function(k){ presetHtml+='<button type="button" class="ai-preset" data-pre="'+k+'">'+k+'</button>'; });
+    cfgBody+='<div class="ai-cfg-form">'
+      +'<div class="ai-cfg-formtitle">添加 / 编辑 API <button type="button" class="btn-ghost" data-newcfg style="float:right">＋ 新配置</button></div>'
+      +'<div class="row"><label>名称</label><input id="ai-name" placeholder="例如 DeepSeek / 我的Kimi"></div>'
+      +'<div class="row"><label>Base</label><input id="ai-base" placeholder="https://api.deepseek.com/v1"></div>'
+      +'<div class="row"><label>Key</label><input id="ai-key" type="password" placeholder="sk-..."></div>'
+      +'<div class="row"><label>模型</label><input id="ai-model" placeholder="deepseek-chat"></div>'
+      +'<div class="row"><span style="font-size:12px;color:var(--muted)">快捷填入：</span>'+presetHtml+'</div>'
+      +'<div class="row"><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ai-ctx" checked> 带上工作台数据（项目/笔记）做上下文</label></div>'
+      +'<div class="row"><button type="button" class="btn btn-sm" id="ai-save">保存 / 更新此 API</button><span class="ai-hint" id="ai-savehint"></span></div>'
+      +'</div>';
+  }
   p.innerHTML=
-    '<div class="ai-set">'+
-      '<div style="font-weight:700;color:var(--blue3);margin-bottom:6px">⚙️ API 配置（OpenAI 兼容，仅存本机浏览器）</div>'+
-      '<div class="row"><label>Base 地址</label><input id="ai-base" placeholder="https://api.deepseek.com/v1" value="'+esc(cfg.base||"")+'"></div>'+
-      '<div class="row"><label>API Key</label><input id="ai-key" type="password" placeholder="sk-..." value="'+esc(cfg.key||"")+'"></div>'+
-      '<div class="row"><label>模型名</label><input id="ai-model" placeholder="deepseek-chat" value="'+esc(cfg.model||"")+'"></div>'+
-      '<div class="row"><span style="font-size:12px;color:var(--muted)">快捷填入：</span>'+presetHtml+'</div>'+
-      '<div class="row"><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="ai-ctx" '+(cfg.ctx!==false?"checked":"")+'> 带上工作台数据（项目/笔记）做上下文</label></div>'+
-      '<div class="row"><button type="button" class="btn btn-sm" id="ai-save">保存配置</button><span class="ai-hint" id="ai-savehint"></span></div>'+
-    '</div>'+
-    '<div class="ai-msgs" id="ai-msgs"></div>'+
-    '<div class="ai-input">'+
-      '<textarea id="ai-input" placeholder="问点什么～ 例如：帮我把「怦怦一夏X横琴长隆」项目写成一段复盘文案"></textarea>'+
-      '<button type="button" id="ai-send">发送</button>'+
-      '<button type="button" class="ghost" id="ai-clear">清空</button>'+
+    '<div class="ai-bar">'
+      +'<span class="ai-bar-title">💬 hello AI</span>'
+      +'<select id="ai-model-sel" class="ai-sel" title="切换模型（选择已配置的 API）">'+selOpts+'</select>'
+      +'<button type="button" class="ai-cfg-toggle" id="ai-cfg-toggle">⚙️ 配置</button>'
+    '</div>'
+    +'<div class="ai-msgs" id="ai-msgs"></div>'
+    +'<div class="ai-input">'
+      +'<textarea id="ai-input" placeholder="问点什么～ 例如：帮我把「怦怦一夏X横琴长隆」项目写成一段复盘文案"></textarea>'
+      +'<button type="button" id="ai-send">发送</button>'
+      +'<button type="button" class="ghost" id="ai-clear">清空</button>'
+    '</div>'
+    +'<div class="ai-set'+(window._ai.collapsed?' collapsed':'')+'">'
+      +'<div class="ai-set-head" id="ai-set-head"><span>⚙️ API 配置（OpenAI 兼容，仅存本机）</span><span class="ai-chev">'+(window._ai.collapsed?'▸':'▾')+'</span></div>'
+      +'<div class="ai-set-body">'+cfgBody+'</div>'
     '</div>';
-  document.getElementById("ai-save").addEventListener("click",function(){
-    var nc={base:document.getElementById("ai-base").value.trim(),key:document.getElementById("ai-key").value.trim(),model:document.getElementById("ai-model").value.trim()||"deepseek-chat",ctx:document.getElementById("ai-ctx").checked};
-    DB.s("aicfg",nc); var h=document.getElementById("ai-savehint"); if(h){h.textContent="✅ 已保存（仅存本机）"; setTimeout(function(){if(h)h.textContent="";},2500);}
-  });
-  document.querySelectorAll("[data-pre]").forEach(function(b){ b.addEventListener("click",function(){
-    var v=PRESETS[b.dataset.pre].split("|"); document.getElementById("ai-base").value=v[0]; document.getElementById("ai-model").value=v[1];
-  }); });
+  renderMsgs();
+  document.getElementById("ai-model-sel").addEventListener("change",function(e){ window._ai.active=+e.target.value||null; if(window._ai.active)DB.s("aiactive",window._ai.active); rhaic(); });
+  document.getElementById("ai-cfg-toggle").addEventListener("click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
+  document.getElementById("ai-set-head").addEventListener("click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
   document.getElementById("ai-send").addEventListener("click",send);
   document.getElementById("ai-input").addEventListener("keydown",function(e){ if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){e.preventDefault();send();} });
   document.getElementById("ai-clear").addEventListener("click",function(){ if(!confirm("确认清空当前对话？（配置保留）"))return; window._ai.chat=[]; DB.s("aichat",[]); renderMsgs(); });
-  renderMsgs();
+  document.querySelectorAll("[data-pre]").forEach(function(b){ b.addEventListener("click",function(){
+    var v=PRESETS[b.dataset.pre].split("|"); document.getElementById("ai-base").value=v[0]; document.getElementById("ai-model").value=v[1];
+    if(!document.getElementById("ai-name").value) document.getElementById("ai-name").value=b.dataset.pre;
+  }); });
+  document.querySelectorAll("[data-use]").forEach(function(b){ b.addEventListener("click",function(){ window._ai.active=+b.dataset.use; DB.s("aiactive",window._ai.active); rhaic(); }); });
+  document.querySelectorAll("[data-edit]").forEach(function(b){ b.addEventListener("click",function(){
+    var c=cfgs.filter(function(x){return x.id===+b.dataset.edit})[0]; if(!c)return;
+    window._ai.editId=+b.dataset.edit;
+    document.getElementById("ai-name").value=c.name||""; document.getElementById("ai-base").value=c.base||""; document.getElementById("ai-key").value=c.key||""; document.getElementById("ai-model").value=c.model||""; document.getElementById("ai-ctx").checked=c.ctx!==false;
+    document.getElementById("ai-name").focus(); toast("已载入到上方表单，改完点「保存 / 更新此 API」",2500);
+  }); });
+  document.querySelectorAll("[data-newcfg]").forEach(function(b){ b.addEventListener("click",function(){ window._ai.editId=null; ["ai-name","ai-base","ai-key","ai-model"].forEach(function(id){var el=document.getElementById(id); if(el)el.value="";}); document.getElementById("ai-ctx").checked=true; document.getElementById("ai-name").focus(); }); });
+  document.querySelectorAll("[data-delcfg]").forEach(function(b){ b.addEventListener("click",function(){
+    if(!confirm("删除该 API 配置？（对话保留）"))return;
+    var id=+b.dataset.delcfg; cfgs=cfgs.filter(function(x){return x.id!==id}); DB.s("aicfgs",cfgs);
+    if(window._ai.active===id){ window._ai.active=null; DB.s("aiactive",null); }
+    window._ai.editId=null; rhaic();
+  }); });
+  document.getElementById("ai-save").addEventListener("click",function(){
+    var name=document.getElementById("ai-name").value.trim()||"未命名";
+    var base=document.getElementById("ai-base").value.trim();
+    var key=document.getElementById("ai-key").value.trim();
+    var model=document.getElementById("ai-model").value.trim()||"deepseek-chat";
+    var ctx=document.getElementById("ai-ctx").checked;
+    if(!base||!key){ toast("请填写 Base 和 Key"); return; }
+    var editId=window._ai.editId||null;
+    if(editId){ var c=cfgs.filter(function(x){return x.id===editId})[0]; if(c){c.name=name;c.base=base;c.key=key;c.model=model;c.ctx=ctx;} window._ai.editId=null; }
+    else { var nc={id:Date.now(),name:name,base:base,key:key,model:model,ctx:ctx}; cfgs.push(nc); window._ai.active=nc.id; DB.s("aiactive",nc.id); }
+    DB.s("aicfgs",cfgs);
+    var h=document.getElementById("ai-savehint"); if(h){h.textContent="✅ 已保存"; setTimeout(function(){if(h)h.textContent="";},2500);}
+    rhaic();
+  });
 }
 /* ================= 通用：链接快捷入口渲染 + 添加/编辑 ================= */
 function hostOf(u){ try{ return new URL(u).host.replace(/^www\./,"") }catch(e){ return u } }
