@@ -1938,7 +1938,7 @@ function rhaic(){
     if(window._ai.active===id){ window._ai.active=null; DB.s("aiactive",null); }
     window._ai.editId=null; rhaic();
   }); });
-  document.getElementById("ai-save").addEventListener("click",function(){
+  var _saveBtn=document.getElementById("ai-save"); if(_saveBtn){ _saveBtn.addEventListener("click",function(){
     var name=document.getElementById("ai-name").value.trim()||"未命名";
     var base=document.getElementById("ai-base").value.trim();
     var key=document.getElementById("ai-key").value.trim();
