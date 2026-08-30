@@ -67,7 +67,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .tab-btn.active::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;background:var(--pink);border-radius:2px}
 
 /* ===== hello AI（外接大模型 · 页面内对话） ===== */
-.ai-set{background:var(--blue1);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px}
+.ai-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ai-bar-title{font-weight:700;color:var(--blue3);font-size:15px}
+.ai-sel{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--blue2);border-radius:8px;font-size:13px;background:#fff;color:var(--blue3);cursor:pointer}
+.ai-cfg-toggle{white-space:nowrap;padding:7px 12px;border:1px solid var(--blue3);border-radius:8px;background:#fff;color:var(--blue3);font-size:13px;cursor:pointer;font-weight:600}
+.ai-cfg-toggle:hover{background:var(--blue3);color:#fff}
+.ai-set{background:var(--blue1);border-radius:var(--radius-sm);margin-top:14px;overflow:hidden}
+.ai-set-head{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--blue3)}
+.ai-set-head:hover{background:var(--blue2)}
+.ai-chev{font-size:12px;color:var(--muted)}
+.ai-set.collapsed{padding:0}
+.ai-set-body{padding:4px 16px 14px}
+.ai-cfg-collapsed{padding:6px 0;font-size:12.5px;color:var(--muted)}
+.ai-cfg-list{margin:6px 0}
+.ai-cfg-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--blue2);border-radius:8px;margin:6px 0;background:#fff}
+.ai-cfg-item.active{border-color:var(--blue3);box-shadow:0 0 0 2px rgba(155,185,216,.35)}
+.ai-cfg-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.ai-cfg-meta b{color:var(--blue3)}
+.ai-cfg-meta span{font-size:11.5px;color:var(--muted)}
+.ai-cfg-tag{font-size:11px;color:#7a2f55;background:var(--pink1);border-radius:10px;padding:1px 7px}
+.ai-cfg-acts{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.ai-cur{font-size:12px;color:#3a7d44;font-weight:700}
+.ai-cfg-form{margin-top:10px;border-top:1px dashed var(--blue2);padding-top:10px}
+.ai-cfg-formtitle{font-size:13px;font-weight:700;color:var(--blue3);margin-bottom:8px}
 .ai-set .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:7px 0}
 .ai-set input{flex:1;min-width:160px;padding:8px 10px;border:1px solid var(--blue2);border-radius:8px;font-size:13px;background:#fff}
 .ai-set label{font-size:12.5px;color:var(--muted);min-width:62px}
