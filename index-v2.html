@@ -1811,7 +1811,7 @@ function rfn(){ renderLinks("pnl-fun","fun",S.fun,{addLabel:"+ 添加好玩的",
 /* ================= 13. hello AI（外接大模型 · 页面内对话） ================= */
 function rhaic(){
   var p=document.getElementById("pnl-helloai"); if(!p)return;
-  if(!window._ai) window._ai={chat:DB.g("aichat",[]),streaming:false,active:DB.g("aiactive",null),collapsed:DB.g("aicollapsed",true),editId:null};
+  if(!window._ai) window._ai={chat:DB.g("aichat",[]),streaming:false,active:DB.g("aiactive",null),collapsed:DB.g("aicollapsed",true),editId:null,lastDocInfo:null};
   // 迁移旧的单配置（aicfg）为数组（aicfgs）
   var cfgs=DB.g("aicfgs",null);
   if(cfgs===null){
@@ -1912,7 +1912,7 @@ function rhaic(){
     if(c.ctx!==false){
       var ctx=buildContext();
       if(ctx&&ctx.length>50){
-        sys+="\n\n【重要】我已经把木木酱工作台的完整数据快照通过这条 system message 提供给你，你可以直接读取并使用。数据包含：项目进度、项目文档管理、重要文档管理、复盘结案、热点资讯、下单模板、话术库、每日 TODO、木木酱の笔记。\n\n你必须基于下面真实数据回答用户问题，直接引用项目名、文档链接、话术内容等具体信息。不要再说“没有读取能力”“访问不到”“无法读取”等推脱词；如果数据里确实没有，再明确说明“当前工作台没有记录”。\n\n"+ctx;
+        sys+="\n\n【重要】我已经把木木酱工作台的完整数据快照通过这条 system message 提供给你，你可以直接读取并使用。数据包含：项目进度、项目文档管理、重要文档管理、复盘结案、热点资讯、下单模板、话术库、每日 TODO、木木酱の笔记。\n\n你必须基于下面真实数据回答用户问题，直接引用项目名、文档链接、话术内容等具体信息。绝对禁止再说“没有读取能力”“访问不到”“无法读取”“没有接入工具”等推脱词；如果数据里确实没有，再明确说明“当前工作台没有记录”。你不需要额外的工具或 API，所有信息已经以文本形式包含在以下 system message 中。\n\n"+ctx;
       } else {
         sys+="\n\n【提示】当前工作台数据为空或尚未同步，请基于通用经验回答，并告知用户可以在工作台录入数据后再来提问。";
       }
