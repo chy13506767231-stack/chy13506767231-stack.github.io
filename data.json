@@ -600,6 +600,24 @@
    "summary": "文旅相关热点，可结合地域文旅冲榜",
    "project": "希尔X盈香心动花园",
    "updatedAt": 1788140188267
+  },
+  {
+   "id": 1,
+   "date": "7.29",
+   "source": "抖音",
+   "title": "丁禹兮新剧路透",
+   "summary": "可结合文库资源包做联动传播",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1788140103269
+  },
+  {
+   "id": 2,
+   "date": "7.29",
+   "source": "小红书",
+   "title": "AI+教育话题走高",
+   "summary": "AI办公工具种草笔记量上涨",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1788140103269
   }
  ],
  "templates": [
