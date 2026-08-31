@@ -1826,11 +1826,26 @@ function rhaic(){
     "OpenAI":"https://api.openai.com/v1|gpt-4o-mini"
   };
   function getActive(){ return cfgs.filter(function(c){return c.id===window._ai.active})[0]||null; }
+  function cut(str,n){ str=String(str||""); return str.length>n?str.slice(0,n)+"…":str; }
   function buildContext(){
     var s=["【项目进度】"];
-    (S.projects||[]).forEach(function(pr){ s.push("- "+pr.name+"（客户:"+(pr.client||"-")+"，状态:"+(pr.status||"-")+(pr.result?"，成果:"+pr.result:"")+"）"); });
+    (S.projects||[]).forEach(function(pr){ s.push("- "+pr.name+"（客户:"+(pr.client||"-")+"，状态:"+(pr.status||"-")+(pr.result?"，成果:"+cut(pr.result,120):"")+"）"); });
+    s.push("【项目文档管理】");
+    (S.projdocs||[]).forEach(function(pj){ var docs=(pj.docs||[]).map(function(d){return (d.name||"")+(d.link?("："+d.link):"")}).join("；"); s.push("- "+pj.project+"："+(docs||"（暂无文档）")); });
+    s.push("【重要文档管理】");
+    (S.impdocs||[]).forEach(function(d){ s.push("- ["+(d.type||"-")+"] "+(d.name||"未命名")+(d.link?("："+d.link):"")+(d.note?("（备注:"+cut(d.note,60)+"）"):"")); });
+    s.push("【复盘结案】");
+    (S.reviews||[]).slice().sort(function(a,b){return (b.editedAt||b.updatedAt||0)-(a.editedAt||a.updatedAt||0)}).forEach(function(r){ s.push("- "+(r.date||"")+"："+cut(r.text||"",160)); });
+    s.push("【热点资讯】");
+    (S.news||[]).forEach(function(n){ s.push("- "+(n.project||"通用")+"｜"+cut(n.title||"",120)+(n.summary?("（"+cut(n.summary,80)+"）"):"")); });
+    s.push("【下单模板】");
+    (S.templates||[]).forEach(function(t){ s.push("- ["+(t.cat||"-")+"] "+(t.title||"")+"："+cut(t.body||"",120)); });
+    s.push("【话术库】");
+    (S.scripts||[]).forEach(function(sc){ s.push("- ["+(sc.scene||"-")+"] "+cut(sc.body||"",120)); });
+    s.push("【每日 TODO】");
+    (S.todos||[]).slice(-20).forEach(function(t){ s.push("- "+(t.date||"")+(t.done?"✓ ":"○ ")+(t.text||"")+(t.note?("（"+t.note+"）"):"")); });
     s.push("【木木酱の笔记】");
-    (S.notes||[]).forEach(function(n){ s.push("- ["+(n.category||"-")+"] "+n.content); });
+    (S.notes||[]).forEach(function(n){ s.push("- ["+(n.category||"-")+"] "+cut(n.content,160)); });
     return s.join("\n");
   }
   function renderMsgs(){
