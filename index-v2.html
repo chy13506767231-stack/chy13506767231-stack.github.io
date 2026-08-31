@@ -1922,7 +1922,7 @@ function rhaic(){
     var docPromise=(c.ctx!==false && c.readDocs!==false)?readFeishuDocs():Promise.resolve("");
     docPromise.then(function(docText){
       if(docText){
-        sys+="\n\n【飞书文档内容】以下是工作台里挂接的飞书文档实际内容（已为你打开读取），涉及“数据回收”“播放/互动/万赞/CPM/成本”等具体数字以这里为准，请直接引用：\n\n"+docText;
+        sys+="\n\n【飞书文档内容】以下是工作台里挂接的飞书文档实际内容（已通过本地代理打开并提取正文）。注意：你不需要“工具”“接口”“权限”再去读取；这些内容已经以纯文本形式提供在这条 system message 里，你正在直接阅读它们。涉及“数据回收”“播放/互动/万赞/CPM/成本”等具体数字以这里为准，请直接引用文档里的原始数字，不要编造。\n\n"+docText;
       }
       var messages=[{role:"system",content:sys}].concat(window._ai.chat.map(function(m){return {role:m.role,content:m.content};}));
       window._ai.chat.push({role:"assistant",content:""}); renderMsgs();
