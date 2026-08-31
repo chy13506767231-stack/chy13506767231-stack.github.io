@@ -1929,6 +1929,7 @@ function rhaic(){
         "（若为 CORS 跨域错误，请改用支持跨域的国内厂商如 DeepSeek / 通义 / Kimi，或在 Mac 端改用本地代理）";
       var err="\n\n[调用失败] "+msg+"\n"+hint;
       window._ai.chat[window._ai.chat.length-1].content=err; renderMsgs(); DB.s("aichat",window._ai.chat);
+      });
     });
   }
   var active=getActive();
