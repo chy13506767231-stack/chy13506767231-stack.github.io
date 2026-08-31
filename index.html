@@ -1611,6 +1611,71 @@ document.getElementById("btn-sync-cloud").addEventListener("click",function(){
   toast("正在与云端合并（本地数据不会被删）");
 });
 
+/* ================= 飞书多维表格双向同步（自建应用令牌） ================= */
+document.getElementById("btn-sync-bitable").addEventListener("click",function(){
+  var cfg = (function(){try{return JSON.parse(localStorage.getItem("wb16_feishu_bitable_cfg")||"{}")}catch(e){return{}}})();
+  function parseLink(u){
+    u=(u||"").trim();
+    var m=u.match(/\/base\/([A-Za-z0-9]+)/)||u.match(/\/bitable\/(?:app\/)?([A-Za-z0-9]+)/);
+    var app=m?m[1]:""; var tid="";
+    var q=u.match(/[?&]table=([A-Za-z0-9]+)/); if(q)tid=q[1];
+    return {app_token:app, table_id:tid};
+  }
+  var stores=["projects","todos","news","reviews","scripts","templates","impdocs","notes","projdocs"];
+  var opt=stores.map(function(s){return '<option value="'+s+'"'+(cfg.store===s?" selected":"")+'>'+s+'</option>'}).join("");
+  omod(
+    '<div style="max-width:540px">'+
+    '<h3 style="margin:0 0 10px">飞书多维表格 · 双向同步</h3>'+
+    '<div class="fg"><label>多维表格链接</label><input id="bt-link" style="width:100%" value="'+esc(cfg.link||"")+'" placeholder="https://xxx.feishu.cn/base/xxxxxxxx"></div>'+
+    '<div class="fg"><label>同步的数据模块</label><select id="bt-store" style="width:100%">'+opt+'</select></div>'+
+    '<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">'+
+    '<button class="btn" id="bt-pull">⬇ 拉取（飞书→工作台）</button>'+
+    '<button class="btn" id="bt-push">⬆ 推送（工作台→飞书）</button>'+
+    '<button class="btn btn-sm" id="bt-close">关闭</button></div>'+
+    '<div class="ai-status" id="bt-status" style="margin-top:10px"></div>'+
+    '<div class="hint" style="margin-top:8px">推送会自动在飞书表里建列/建表并按 wb_id 增量更新；拉取把记录合并进所选模块。需先在本应用开启「多维表格」权限，并把机器人加为该表协作者。</div>'+
+    '</div>'
+  );
+  var linkEl=document.getElementById("bt-link"), storeEl=document.getElementById("bt-store"), stEl=document.getElementById("bt-status");
+  function saveCfg(){ localStorage.setItem("wb16_feishu_bitable_cfg", JSON.stringify({link:linkEl.value, store:storeEl.value})); }
+  linkEl.oninput=saveCfg; storeEl.onchange=saveCfg;
+  document.getElementById("bt-close").onclick=cmod;
+  document.getElementById("bt-pull").onclick=function(){
+    var p=parseLink(linkEl.value);
+    if(!p.app_token){stEl.innerHTML='<span class="warn">请先粘贴多维表格链接</span>';return;}
+    stEl.innerHTML='<span>拉取中…</span>';
+    fetch("/api/feishu-bitable?app_token="+encodeURIComponent(p.app_token)+"&table_id="+encodeURIComponent(p.table_id))
+      .then(function(r){return r.json()}).then(function(j){
+        if(!j.ok){stEl.innerHTML='<span class="warn">拉取失败：'+(j.error||j.msg||"")+'</span>';return;}
+        var store=storeEl.value, recs=j.records||[], idKey=SYNC_IDENTITY[store], n=0;
+        recs.forEach(function(rec){
+          var f=rec.fields||{}; var item=Object.assign({},f);
+          if(f.wb_id) item.id=f.wb_id; else if(!item.id) item.id=S.nid(S[store]);
+          var exist=null;
+          if(f.wb_id) exist=S[store].find(function(x){return String(x.id)===String(f.wb_id)});
+          if(!exist && idKey && f[idKey]!=null) exist=S[store].find(function(x){return x[idKey]!=null && String(x[idKey])===String(f[idKey])});
+          if(exist){var k=exist.id;Object.assign(exist,item);exist.id=k;} else S[store].push(item);
+          n++;
+        });
+        S.save();renderHeader();st(ct);
+        stEl.innerHTML='<span class="ok">✓ 已合并 '+n+' 条到 '+store+'</span>';
+        toast("飞书拉取完成，合并 "+n+" 条");
+      }).catch(function(e){stEl.innerHTML='<span class="warn">请求失败：'+e+'</span>'});
+  };
+  document.getElementById("bt-push").onclick=function(){
+    var p=parseLink(linkEl.value);
+    if(!p.app_token){stEl.innerHTML='<span class="warn">请先粘贴多维表格链接</span>';return;}
+    var store=storeEl.value, items=S[store]||[];
+    stEl.innerHTML='<span>推送中（'+items.length+' 条）…</span>';
+    fetch("/api/feishu-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({app_token:p.app_token,table_id:p.table_id,store:store,items:items})})
+      .then(function(r){return r.json()}).then(function(j){
+        if(!j.ok){stEl.innerHTML='<span class="warn">推送失败：'+(j.error||"")+'</span>';return;}
+        stEl.innerHTML='<span class="ok">✓ 已写入 新建'+j.created+' / 更新'+j.updated+'</span>';
+        toast("飞书推送完成（新建"+j.created+" 更新"+j.updated+"）");
+      }).catch(function(e){stEl.innerHTML='<span class="warn">请求失败：'+e+'</span>'});
+  };
+});
+
 /* ================= 启动 ================= */
 var RENDER={overview:ro,todo:rt,projects:rp,projdocs:rpd,news:rn,templates:rtp,impdocs:rid,review:rv,notes:rno,scripts:rs,aitool:rai,helloai:rhaic,fun:rfn};
 /* 文件模式（file://）打开时给出醒目提示：fetch 会被浏览器拦截，热点/飞书功能不可用 */
