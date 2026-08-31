@@ -1814,6 +1814,11 @@ function rhaic(){
     cfgs=(old&&old.base)?[{id:Date.now(),name:"我的 API",base:old.base,key:old.key,model:old.model||"deepseek-chat",ctx:old.ctx!==false}]:[];
     DB.s("aicfgs",cfgs);
   }
+  // 迁移旧模型名：moonshot-v1 系列 2026-08-31 平台下线，自动替换为 kimi-k3
+  if(cfgs&&cfgs.length){
+    var needMig=cfgs.some(function(c){return c.model&&c.model.indexOf("moonshot-v1")===0;});
+    if(needMig){ cfgs.forEach(function(c){ if(c.model&&c.model.indexOf("moonshot-v1")===0) c.model="kimi-k3"; }); DB.s("aicfgs",cfgs); console.log("[helloAI] 已将旧 moonshot-v1 模型迁移为 kimi-k3"); }
+  }
   var PRESETS={
     "DeepSeek":"https://api.deepseek.com/v1|deepseek-chat",
     "通义千问":"https://dashscope.aliyuncs.com/compatible-mode/v1|qwen-plus",
