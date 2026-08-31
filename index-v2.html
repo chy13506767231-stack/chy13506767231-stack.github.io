@@ -1886,8 +1886,21 @@ function rhaic(){
     })).then(function(arr){
       clearTimeout(to);
       var txt=arr.filter(function(x){return x;}).join("\n\n----\n\n");
+      window._ai.lastDocInfo={links:links.length,chars:txt.length,ts:Date.now()};
+      updateStatus();
       return txt;
     }).catch(function(){ return ""; });
+  }
+  function updateStatus(){
+    var box=document.getElementById("ai-status"); if(!box)return;
+    var onLocal=(location.hostname==="localhost"||location.hostname==="127.0.0.1")&&location.protocol==="http:";
+    var links=extractDocLinks();
+    var info=window._ai.lastDocInfo||{};
+    var html='';
+    html+='<span class="'+(onLocal?'ok':'warn')+'">'+(onLocal?'● 本机代理可用':'● 非本机地址，飞书文档实时读取未开启')+'</span>';
+    html+='<span>发现 '+links.length+' 个飞书链接</span>';
+    if(info.ts) html+='<span class="ok">已读取 '+info.chars+' 字</span>';
+    box.innerHTML=html;
   }
   function send(){
     if(window._ai.streaming) return;
