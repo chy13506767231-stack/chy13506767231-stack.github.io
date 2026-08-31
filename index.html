@@ -1845,7 +1845,7 @@ function rhaic(){
     s.push("【每日 TODO】");
     (S.todos||[]).slice(-20).forEach(function(t){ s.push("- "+(t.date||"")+(t.done?"✓ ":"○ ")+(t.text||"")+(t.note?("（"+t.note+"）"):"")); });
     s.push("【木木酱の笔记】");
-    (S.notes||[]).forEach(function(n){ s.push("- ["+(n.category||"-")+"] "+cut(n.content,160)); });
+    (S.notes||[]).forEach(function(n){ s.push("- ["+(n.category||"-")+"] "+cut(n.content,700)); });
     return s.join("\n");
   }
   function renderMsgs(){
