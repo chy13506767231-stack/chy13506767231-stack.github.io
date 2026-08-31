@@ -59,6 +59,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 
 /* ===== 布局：左侧 Tab 边栏 + 右侧内容（蓝粉主题：未点=蓝，点了=粉） ===== */
 .layout{display:flex;align-items:flex-start;gap:18px;margin-top:10px}
+.panels{flex:1;min-width:0}
 .tab-nav{display:flex;flex-direction:column;flex:0 0 172px;width:172px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);border-radius:14px;padding:8px;gap:4px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow-y:auto;align-self:flex-start}
 .tab-nav::-webkit-scrollbar{width:4px}
 .tab-nav::-webkit-scrollbar-thumb{background:var(--blue-d);border-radius:2px}
