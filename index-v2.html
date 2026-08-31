@@ -1890,19 +1890,22 @@ function rhaic(){
     var sys="你是木木酱的 AI 工作助手，语气亲切、专业、用中文回答。";
     if(c.ctx!==false){
       var ctx=buildContext();
-      var docPromise=(c.readDocs!==false)?readFeishuDocs():Promise.resolve("");
-      docPromise.then(function(docText){
-        if(ctx&&ctx.length>50){
-          sys+="\n\n【重要】我已经把木木酱工作台的完整数据快照通过这条 system message 提供给你，你可以直接读取并使用。数据包含：项目进度、项目文档管理、重要文档管理、复盘结案、热点资讯、下单模板、话术库、每日 TODO、木木酱の笔记。\n\n你必须基于下面真实数据回答用户问题，直接引用项目名、文档链接、话术内容等具体信息。不要再说“没有读取能力”“访问不到”“无法读取”等推脱词；如果数据里确实没有，再明确说明“当前工作台没有记录”。\n\n"+ctx;
-        } else {
-          sys+="\n\n【提示】当前工作台数据为空或尚未同步，请基于通用经验回答，并告知用户可以在工作台录入数据后再来提问。";
-        }
-        if(docText){
-          sys+="\n\n【飞书文档内容】以下是工作台里挂接的飞书文档实际内容（已为你打开读取），涉及“数据回收”“播放/互动/万赞/CPM/成本”等具体数字以这里为准，请直接引用：\n\n"+docText;
-        }
-        var messages=[{role:"system",content:sys}].concat(window._ai.chat.map(function(m){return {role:m.role,content:m.content};}));
-        window._ai.chat.push({role:"assistant",content:""}); renderMsgs();
-        window._ai.streaming=true;
+      if(ctx&&ctx.length>50){
+        sys+="\n\n【重要】我已经把木木酱工作台的完整数据快照通过这条 system message 提供给你，你可以直接读取并使用。数据包含：项目进度、项目文档管理、重要文档管理、复盘结案、热点资讯、下单模板、话术库、每日 TODO、木木酱の笔记。\n\n你必须基于下面真实数据回答用户问题，直接引用项目名、文档链接、话术内容等具体信息。不要再说“没有读取能力”“访问不到”“无法读取”等推脱词；如果数据里确实没有，再明确说明“当前工作台没有记录”。\n\n"+ctx;
+      } else {
+        sys+="\n\n【提示】当前工作台数据为空或尚未同步，请基于通用经验回答，并告知用户可以在工作台录入数据后再来提问。";
+      }
+    } else {
+      sys+="\n\n【提示】本次对话未开启“带上下文”开关，你只能基于通用知识回答。如需要读取工作台数据，请让用户在 API 配置里勾选“带上下文”。";
+    }
+    var docPromise=(c.ctx!==false && c.readDocs!==false)?readFeishuDocs():Promise.resolve("");
+    docPromise.then(function(docText){
+      if(docText){
+        sys+="\n\n【飞书文档内容】以下是工作台里挂接的飞书文档实际内容（已为你打开读取），涉及“数据回收”“播放/互动/万赞/CPM/成本”等具体数字以这里为准，请直接引用：\n\n"+docText;
+      }
+      var messages=[{role:"system",content:sys}].concat(window._ai.chat.map(function(m){return {role:m.role,content:m.content};}));
+      window._ai.chat.push({role:"assistant",content:""}); renderMsgs();
+      window._ai.streaming=true;
         fetch((c.base||"").replace(/\/$/,"")+"/chat/completions",{
           method:"POST",
           headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},
