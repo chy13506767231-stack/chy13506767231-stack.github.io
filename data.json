@@ -582,6 +582,42 @@
    "summary": "万赞相关热点",
    "project": "",
    "updatedAt": 1788148654735
+  },
+  {
+   "id": 1,
+   "date": "7.29",
+   "source": "抖音",
+   "title": "丁禹兮新剧路透",
+   "summary": "可结合文库资源包做联动传播",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1788140103269
+  },
+  {
+   "id": 2,
+   "date": "7.29",
+   "source": "小红书",
+   "title": "AI+教育话题走高",
+   "summary": "AI办公工具种草笔记量上涨",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1788140103269
+  },
+  {
+   "id": 3,
+   "date": "7.28",
+   "source": "微博",
+   "title": "暑期文旅旺季",
+   "summary": "可结合地域文旅冲榜",
+   "project": "希尔X盈香心动花园",
+   "updatedAt": 1788140188267
+  },
+  {
+   "id": 5,
+   "date": "8.4",
+   "source": "抖音",
+   "title": "恭喜你被分配到了各地文旅",
+   "summary": "文旅相关热点，可结合地域文旅冲榜",
+   "project": "希尔X盈香心动花园",
+   "updatedAt": 1788140188267
   }
  ],
  "templates": [
