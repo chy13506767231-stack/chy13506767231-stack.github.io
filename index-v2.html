@@ -1588,6 +1588,7 @@ document.getElementById("btn-sync-feishu").addEventListener("click",function(){
     STORE_KEYS.forEach(function(k){
       if(!Array.isArray(data[k]))return;
       var idKey=SYNC_IDENTITY[k];
+      if(k==="notes"||k==="scripts"){ var pre=(k==="notes")?"【飞书SOP】":"飞书SOP"; S[k]=S[k].filter(function(x){ var f=(k==="notes")?x.category:x.scene; return !(f&&String(f).indexOf(pre)===0); }); }
       data[k].forEach(function(it){
         var exist=S[k].find(function(x){return idKey&&x[idKey]&&it[idKey]&&x[idKey]===it[idKey]});
         if(exist){var keepId=exist.id;Object.assign(exist,it);exist.id=keepId}
