@@ -2010,6 +2010,11 @@ function rhaic(){
     '</div>';
   p.innerHTML=html;
   renderMsgs();
+  updateStatus();
+  // 在本机环境下，后台预读飞书文档，这样首次发送时无需等待
+  if((location.hostname==="localhost"||location.hostname==="127.0.0.1")&&location.protocol==="http:"){
+    readFeishuDocs();
+  }
   function _on(id,ev,fn){ var el=document.getElementById(id); if(el) el.addEventListener(ev,fn); }
   _on("ai-model-sel","change",function(e){ window._ai.active=+e.target.value||null; if(window._ai.active)DB.s("aiactive",window._ai.active); rhaic(); });
   _on("ai-cfg-toggle","click",function(){ window._ai.collapsed=!window._ai.collapsed; DB.s("aicollapsed",window._ai.collapsed); rhaic(); });
