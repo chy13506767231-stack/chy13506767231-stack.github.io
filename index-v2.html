@@ -816,7 +816,8 @@ function ro(){
   var todayTodos=latest?S.todos.filter(function(t){return t.date===latest}):[];
   html+='<div class="card"><div class="card-hd"><span class="card-title">最近待办（'+esc(latest||"无")+'）</span><button class="btn btn-sm" data-link="todo">TODO</button></div>';
   html+=todayTodos.length?todayTodos.map(function(t){
-    return '<div class="todo-row"><div class="todo-item"><input type="checkbox"'+(t.done?' checked':'')+' data-ov-tid="'+t.id+'"><span class="'+(t.done?'text-line':'')+'" style="font-size:12px">'+esc(t.text)+'</span></div></div>';
+    var _rs=remindState(t);
+    return '<div class="todo-row '+_rs.cls+'"><div class="todo-item"><input type="checkbox"'+(t.done?' checked':'')+' data-ov-tid="'+t.id+'"><span class="'+(t.done?'text-line':'')+'" style="font-size:12px">'+esc(t.text)+'</span>'+remindBadgeHtml(t)+'</div></div>';
   }).join(""):'<div class="empty">暂无待办</div>';
   html+='</div>';
   html+='<div class="card"><div class="card-hd"><span class="card-title">快捷入口</span></div><div class="row gap-4">'
@@ -840,17 +841,26 @@ function rt(){
   var groups={};S.todos.forEach(function(t){(groups[t.date]=groups[t.date]||[]).push(t)});
   var keys=Object.keys(groups).sort(function(a,b){return dateKey(b)-dateKey(a)});
   var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-td-btn">+ 添加待办</button></div>';
+  var dueCount=S.todos.filter(function(t){return !t.done && t.remind && (function(){var r=new Date(t.remind).getTime();return !isNaN(r) && r<=Date.now()+3600000;})();}).length;
+  if(dueCount>0) html+='<div class="remind-zone">⏰ 待提醒 '+dueCount+' 条（已逾期或 1 小时内）</div>';
+  if(typeof Notification!=="undefined"){ html+='<div class="row mb-12 gap-8"><button class="btn btn-sm" id="remind-on">🔔 '+(Notification.permission==="granted"?"通知已开启":"开启提醒通知")+'</button><span class="hint">到点弹系统通知（需保持工作台页面打开）</span></div>'; }
   html+=keys.length?keys.map(function(d){
     return '<div class="card"><div class="fw-700 mb-8" style="font-size:13px">'+esc(d)+'</div>'
       +orderItems(groups[d],"todos",function(t){return t.id}).map(function(t){
         var _note=t.note?'<div class="todo-note">'+esc(t.note)+'</div>':'';
-        return '<div class="drag-item todo-row" data-drag-id="'+t.id+'"><div class="todo-item"><input type="checkbox"'+(t.done?' checked':'')+' data-tid="'+t.id+'"><span class="'+(t.done?'text-line':'')+'" style="flex:1;font-size:12px">'+esc(t.text)+'</span><button class="btn-ghost" data-tedit="'+t.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-tdel="'+t.id+'">✕</button></div>'+_note+'</div>';
+        var _rs=remindState(t);
+        return '<div class="drag-item todo-row '+_rs.cls+'" data-drag-id="'+t.id+'"><div class="todo-item"><input type="checkbox"'+(t.done?' checked':'')+' data-tid="'+t.id+'"><span class="'+(t.done?'text-line':'')+'" style="flex:1;font-size:12px">'+esc(t.text)+'</span>'+remindBadgeHtml(t)+'<button class="btn-ghost" data-tedit="'+t.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-tdel="'+t.id+'">✕</button></div>'+_note+'</div>';
       }).join("")+'</div>';
   }).join(""):'<div class="empty">暂无待办</div>';
   document.getElementById("pnl-todo").className="theme-morandi";
   document.getElementById("pnl-todo").innerHTML=html;
   bindDrag("pnl-todo","todos");
   document.getElementById("add-td-btn").addEventListener("click",function(){todoModal(null)});
+  var rb=document.getElementById("remind-on");
+  if(rb) rb.addEventListener("click",function(){
+    if(typeof Notification==="undefined"){toast("当前浏览器不支持系统通知");return;}
+    Notification.requestPermission().then(function(p){ toast(p==="granted"?"已开启提醒通知":"未授权通知"); rt(); if(p==="granted") reminderTick(); }).catch(function(){ toast("未授权通知"); rt(); });
+  });
   document.querySelectorAll("[data-tedit]").forEach(function(b){b.addEventListener("click",function(){todoModal(+b.dataset.tedit)})});
   document.querySelectorAll("[data-tid]").forEach(function(cb){
     cb.addEventListener("change",function(){
@@ -1861,6 +1871,7 @@ function boot(){
   var h=(location.hash||"").replace(/^#/,"");
   if(h && TABS.indexOf(h)>=0) st(h);
   else st("overview");
+  startReminder();
   window.addEventListener("hashchange",function(){
     var x=(location.hash||"").replace(/^#/,"");
     if(x && TABS.indexOf(x)>=0) st(x);
