@@ -874,9 +874,44 @@ function todoModal(id){
     var d=document.getElementById("td-date").value.trim(),x=document.getElementById("td-text").value.trim();
     if(!d||!x){toast("请填写完整");return}
     var nt=document.getElementById("td-note").value.trim();
-    if(t){t.date=d;t.text=x;t.note=nt}else{S.todos.push({id:S.nid(S.todos),date:d,text:x,note:nt,done:0})}
+    var rm=document.getElementById("td-remind").value.trim();
+    if(t){t.date=d;t.text=x;t.note=nt;t.remind=rm}else{S.todos.push({id:S.nid(S.todos),date:d,text:x,note:nt,done:0,remind:rm})}
     S.save();cmod();renderHeader();rt();
   });
+}
+
+/* ================= TODO 时间提醒（视觉高亮 + 浏览器通知） ================= */
+function remindState(t){
+  if(!t||!t.remind||t.done) return {cls:"",badge:""};
+  var rt2=new Date(t.remind).getTime(); if(isNaN(rt2)) return {cls:"",badge:""};
+  var d=Date.now()-rt2;
+  if(d>0) return {cls:"todo-overdue",badge:"⏰ 已逾期"};
+  if(d>-3600000) return {cls:"todo-duesoon",badge:"⏰ 即将提醒"};
+  return {cls:"",badge:""};
+}
+function remindBadgeHtml(t){var s=remindState(t); return s.badge?'<span class="remind-badge">'+s.badge+'</span>':'';}
+function _remindedLoad(){try{return JSON.parse(localStorage.getItem("wb16_reminded")||"{}")}catch(e){return{}}}
+function _remindedSave(o){try{localStorage.setItem("wb16_reminded",JSON.stringify(o))}catch(e){}}
+var _reminded=_remindedLoad();
+function reminderTick(){
+  if(typeof Notification==="undefined"||Notification.permission!=="granted")return;
+  var now=Date.now();
+  S.todos.forEach(function(t){
+    if(t.done||!t.remind)return;
+    var rt2=new Date(t.remind).getTime(); if(isNaN(rt2))return;
+    if(rt2<=now){
+      /* 超过 2 小时的旧逾期项不再弹通知，仅记录以免日后重复弹 */
+      if(rt2<now-2*3600*1000){ if(_reminded[String(t.id)]!==t.remind){_reminded[String(t.id)]=t.remind;_remindedSave(_reminded);} return; }
+      if(_reminded[String(t.id)]===t.remind)return;
+      try{new Notification("⏰ 待办提醒",{body:(t.text||"")+(t.date?"（"+t.date+"）":"")});}catch(e){}
+      _reminded[String(t.id)]=t.remind;_remindedSave(_reminded);
+    }
+  });
+}
+function startReminder(){
+  if(typeof Notification==="undefined")return;
+  if(Notification.permission==="granted")reminderTick();
+  setInterval(reminderTick,30000);
 }
 
 /* ================= 3. 项目进度 ================= */
