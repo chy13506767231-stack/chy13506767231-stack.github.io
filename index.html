@@ -868,6 +868,7 @@ function todoModal(id){
     +'<div class="fg"><label>日期（如 8.4）</label><input id="td-date" value="'+(t?esc(t.date):todayMD())+'"></div>'
     +'<div class="fg"><label>内容</label><input id="td-text" value="'+(t?esc(t.text):"")+'"></div>'
     +'<div class="fg"><label>备注（执行路径）</label><textarea id="td-note" rows="3" style="resize:vertical">'+((t&&t.note)?esc(t.note):"")+'</textarea></div>'
+    +'<div class="fg"><label>提醒时间（可选，日期+钟点）</label><input id="td-remind" type="datetime-local" value="'+(t&&t.remind?esc(t.remind):"")+'"></div>'
     +'<div class="row row-end gap-4 mt-12"><button class="btn" id="tdc">取消</button><button class="btn btn-primary" id="tds">保存</button></div>');
   bindModal("tdc","tds",function(){
     var d=document.getElementById("td-date").value.trim(),x=document.getElementById("td-text").value.trim();
