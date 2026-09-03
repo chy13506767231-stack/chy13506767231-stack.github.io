@@ -516,6 +516,21 @@ var S={
   DB.s("reflects",[]);
 })();
 
+/* 一次性自愈：TODO 墓碑误杀（id 复用曾吃掉新条目）。
+   现象：曾删过某 TODO，其 id 进 S.deleted.todos；之后新加 TODO 复用该 id，被 mergeLWW 的 applyTombs 永久过滤 → 刷新即消失。
+   判断：加载瞬间，本地 S.todos 里存在某 id 且 S.deleted.todos 也含该 id → 属误杀（真删除后二者不可能同存）→ 释放墓碑、保留数据。 */
+(function migrateTodoTombHeal(){
+  if(localStorage.getItem("wb16_mig_todotomb_v1")) return;
+  localStorage.setItem("wb16_mig_todotomb_v1","1");
+  var dt=(S.deleted&&S.deleted.todos)||[];
+  if(!dt.length) return;
+  var inTodos={}; S.todos.forEach(function(t){inTodos[t.id]=1;});
+  var keep=dt.filter(function(id){return !inTodos[id];});
+  if(keep.length!==dt.length){
+    S.deleted.todos=keep; DB.s("deleted",S.deleted); DB.s("todos",S.todos);
+  }
+})();
+
 /* ================= 工具函数 ================= */
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
 /* ================= 手动拖拽排序（user order preference） ================= */
