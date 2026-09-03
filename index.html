@@ -488,7 +488,16 @@ var S={
      这是修复「本地删除刷新后又被云端并集合并补回来」的关键：删除必须同步到云端真源，
      否则 mergeLWW 的并集合并会认为「云端有、本地没有」而把项目复活。 */
   save:function(){STORE_KEYS.forEach(function(k){DB.s(k,this[k])}.bind(this)); if(REMOTE_OK)cloudPut(cloudObj(),function(ok){setSyncPill(ok?"☁️ 已同步云端":"📴 离线·本机"); if(!ok)toast("云端同步失败，改动已保存在本机",3000)})},
-  nid:function(l){return l.length?Math.max.apply(null,l.map(function(i){return i.id}))+1:1}
+  /* nid：分配新 id 时避开「墓碑里已删除的 id」，避免新条目复用被删除 id 而遭 applyTombs 永久误杀
+     （同类于项目 id 复用事故；TODO 删除按 id 记墓碑，id 复用会吃掉新加条目 → 刷新即消失） */
+  nid:function(l){
+    var ids=(l||[]).map(function(i){return i.id||0;});
+    var used={}; ids.forEach(function(i){used[i]=1;});
+    if(S.deleted)Object.keys(S.deleted).forEach(function(k){(S.deleted[k]||[]).forEach(function(v){if(typeof v==="number")used[v]=1;});});
+    var max=0; ids.forEach(function(i){if(i>max)max=i;});
+    if(S.deleted)Object.keys(S.deleted).forEach(function(k){(S.deleted[k]||[]).forEach(function(v){if(typeof v==="number"&&v>max)max=v;});});
+    var n=max; while(used[n+1])n++; return n+1;
+  }
 };
 
 /* ================= 一次性迁移：木木酱の反思 → 并入「复盘结案」（合并为一个 tab） ================= */
