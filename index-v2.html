@@ -1921,6 +1921,19 @@ if(location.protocol!=="file:"){
     if(hasRemote){
       /* 云端有数据 → LWW 合并（本地优先，绝不删本地条目），再把合并结果回推云端做对账 */
       mergeLWW(remote);
+      /* 自愈2：云端仍残留被墓碑吞掉的真数据 → 属误杀（真删除后云端不可能还含该 id，只有“删旧 id 后又复用新加”才会云端同时残留 id 且墓碑含它）。
+         释放墓碑并把云端真数据补回 S.todos，恢复用户被误删的 TODO（如 9.3 那两条带提醒时间的）。 */
+      (function healTodoTombRemote(remote){
+        if(!remote||!Array.isArray(remote.todos))return;
+        var dt=(S.deleted&&S.deleted.todos)||[];
+        if(!dt.length)return;
+        var inRemote={}; remote.todos.forEach(function(t){inRemote[t.id]=t;});
+        var keep=dt.filter(function(id){return !inRemote[id];});
+        var added=false;
+        dt.forEach(function(id){ if(inRemote[id]&&!S.todos.some(function(t){return t.id===id;})){ S.todos.push(inRemote[id]); added=true; } });
+        if(keep.length!==dt.length){ S.deleted.todos=keep; added=true; }
+        if(added){ DB.s("deleted",S.deleted); DB.s("todos",S.todos); }
+      })(remote);
       S.save(true);
       setSyncPill("☁️ 已同步云端");
     }
