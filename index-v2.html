@@ -367,7 +367,7 @@ textarea{resize:vertical;min-height:70px}
       </div>
     </div>
     <div class="header-mascot">
-      <button id="wallpaper-btn" title="更换壁纸" style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.45);border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;margin-right:2px;backdrop-filter:blur(4px);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.45)'" onmouseout="this.style.background='rgba(255,255,255,.25)'">🖼️</button>
+      <button id="wallpaper-btn" title="更换壁纸（右键恢复默认）" style="background:transparent;border:none;cursor:pointer;width:44px;height:60px;padding:0;margin-right:2px;display:flex;align-items:center;justify-content:center;transition:transform .15s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'"><img src="assets/kitty-btn.png" alt="更换壁纸" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none"></button>
       <img class="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴">
     </div>
   </div>
@@ -2384,31 +2384,39 @@ function linkModal(key,id){
     fetch('/api/wallpaper',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reset:true})}).catch(function(){});
     setTimeout(function(){location.reload();},300);
   });
-  /* 启动：读取已保存的壁纸与配色 */
-  try{
-    var savedColors=localStorage.getItem('wall_colors');
-    if(savedColors){
-      var im=new Image();
-      im.onload=function(){wbApply('assets/wallpaper_custom.jpg',JSON.parse(savedColors));};
-      im.onerror=function(){
-        /* PC 无文件时尝试本机缓存（手机端降级路径） */
-        var local=localStorage.getItem('wall_local');
-        if(local)wbApply(local,JSON.parse(savedColors));
-      };
-      im.src='assets/wallpaper_custom.jpg?_t='+Date.now();
-    }else{
-      /* 无本机记录：读云端 meta（PC 上传后自动推送到 Pages，手机也能读到） */
-      fetch('assets/wallpaper_meta.json?_t='+Date.now())
-        .then(function(r){return r.ok?r.json():null;})
-        .then(function(m){
-          if(m&&m.colors&&m.colors.accent){
-            var im2=new Image();
-            im2.onload=function(){wbApply('assets/wallpaper_custom.jpg?_t='+(m.ts||''),m.colors);};
-            im2.src='assets/wallpaper_custom.jpg?_t='+(m.ts||'');
-          }
-        }).catch(function(){});
+  /* 启动：优先读云端 meta（PC 上传后自动推 Pages，手机也能读到），失败再退本机记录 */
+  (function(){
+    function applyMeta(m,url){
+      try{localStorage.setItem('wall_colors',JSON.stringify(m.colors));}catch(e){}
+      wbApply(url,m.colors);
     }
-  }catch(e){}
+    fetch('assets/wallpaper_meta.json?_t='+Date.now())
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(m){
+        if(m&&m.colors&&m.colors.accent){
+          var im2=new Image();
+          im2.onload=function(){applyMeta(m,'assets/wallpaper_custom.jpg?_t='+(m.ts||''));};
+          im2.onerror=function(){
+            /* 云端图缺失（手机端未同步时）：试本机缓存 */
+            try{
+              var c=localStorage.getItem('wall_colors'),l=localStorage.getItem('wall_local');
+              if(c&&l)wbApply(l,JSON.parse(c));
+            }catch(e){}
+          };
+          im2.src='assets/wallpaper_custom.jpg?_t='+(m.ts||'');
+        }else{
+          try{
+            var c0=localStorage.getItem('wall_colors'),l0=localStorage.getItem('wall_local');
+            if(c0&&l0)wbApply(l0,JSON.parse(c0));
+          }catch(e){}
+        }
+      }).catch(function(){
+        try{
+          var c1=localStorage.getItem('wall_colors'),l1=localStorage.getItem('wall_local');
+          if(c1&&l1)wbApply(l1,JSON.parse(c1));
+        }catch(e){}
+      });
+  })();
 })();
 </script>
 </body>
