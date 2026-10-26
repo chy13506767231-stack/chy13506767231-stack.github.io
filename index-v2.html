@@ -374,12 +374,12 @@ textarea{resize:vertical;min-height:70px}
     <div class="header-mascot">
       <button id="wallpaper-btn" title="更换壁纸（右键恢复默认）" style="background:transparent;border:none;cursor:pointer;width:44px;height:60px;padding:0;margin-right:2px;display:flex;align-items:center;justify-content:center;transition:transform .15s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'"><img src="assets/kitty-btn.png" alt="更换壁纸" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none"></button>
       <div style="position:relative;display:flex;flex-direction:column;align-items:center">
-        <img class="boys-header" id="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴" onclick="boysClick()" title="点击暂停/继续轮换">
+        <img class="boys-header" id="boys-header" src="assets/header-pool/boy-duo.png" alt="木木酱の小伙伴" title="点击暂停/继续轮换">
         <div style="display:flex;gap:3px;margin-top:2px">
-          <button id="boys-add-btn" title="添加头像图" onclick="document.getElementById('boys-file').click()" style="background:rgba(255,255,255,.55);border:none;border-radius:8px;width:20px;height:16px;font-size:10px;line-height:1;cursor:pointer;color:#5a6470;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(60,70,90,.2);padding:0">＋</button>
-          <button id="boys-swap-btn" title="立即换一张" onclick="boysSwap(true)" style="background:rgba(255,255,255,.55);border:none;border-radius:8px;width:20px;height:16px;font-size:10px;line-height:1;cursor:pointer;color:#5a6470;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(60,70,90,.2);padding:0">⇄</button>
+          <button id="boys-add-btn" title="添加头像图" style="background:rgba(255,255,255,.55);border:none;border-radius:8px;width:20px;height:16px;font-size:10px;line-height:1;cursor:pointer;color:#5a6470;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(60,70,90,.2);padding:0">＋</button>
+          <button id="boys-swap-btn" title="立即换一张" style="background:rgba(255,255,255,.55);border:none;border-radius:8px;width:20px;height:16px;font-size:10px;line-height:1;cursor:pointer;color:#5a6470;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(60,70,90,.2);padding:0">⇄</button>
         </div>
-        <input type="file" id="boys-file" accept="image/*" style="display:none" onchange="boysUpload(this)">
+        <input type="file" id="boys-file" accept="image/*" style="display:none">
       </div>
     </div>
   </div>
@@ -2487,8 +2487,13 @@ function linkModal(key,id){
         else{alert('保存失败：'+(j&&j.err||'未知错误'));}
       }).catch(function(){input.value='';alert('保存失败：本机服务未响应');});
     };
-    rd.readAsDataURL(f);
+      rd.readAsDataURL(f);
   }
+  /* 点击交互：闭包内直接 addEventListener 绑定，避免 HTML onclick 找不到函数（导致点击无反应） */
+  document.getElementById('boys-header').addEventListener('click',boysClick);
+  document.getElementById('boys-add-btn').addEventListener('click',function(){document.getElementById('boys-file').click();});
+  document.getElementById('boys-swap-btn').addEventListener('click',function(){boysSwap(true);});
+  document.getElementById('boys-file').addEventListener('change',function(){boysUpload(this);});
   (function(){
     var img=document.getElementById('boys-header');
     fetch('/api/header-pool').then(function(r){return r.ok?r.json():null}).then(function(j){
