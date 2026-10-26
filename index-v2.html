@@ -2396,6 +2396,17 @@ function linkModal(key,id){
         if(local)wbApply(local,JSON.parse(savedColors));
       };
       im.src='assets/wallpaper_custom.jpg?_t='+Date.now();
+    }else{
+      /* 无本机记录：读云端 meta（PC 上传后自动推送到 Pages，手机也能读到） */
+      fetch('assets/wallpaper_meta.json?_t='+Date.now())
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(m){
+          if(m&&m.colors&&m.colors.accent){
+            var im2=new Image();
+            im2.onload=function(){wbApply('assets/wallpaper_custom.jpg?_t='+(m.ts||''),m.colors);};
+            im2.src='assets/wallpaper_custom.jpg?_t='+(m.ts||'');
+          }
+        }).catch(function(){});
     }
   }catch(e){}
 })();
