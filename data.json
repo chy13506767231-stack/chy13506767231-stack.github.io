@@ -78,6 +78,14 @@
    "updatedAt": 1793017358231
   },
   {
+   "id": 13,
+   "date": "8.5",
+   "text": "且初物料发布，需要授权",
+   "note": "",
+   "done": 1,
+   "updatedAt": 1793017358231
+  },
+  {
    "id": 14,
    "date": "8.5",
    "text": "长隆数据回收",
@@ -105,14 +113,6 @@
    "id": 18,
    "date": "8.6",
    "text": "长隆 复盘 数据回收",
-   "note": "",
-   "done": 1,
-   "updatedAt": 1793017358231
-  },
-  {
-   "id": 13,
-   "date": "8.5",
-   "text": "且初物料发布，需要授权",
    "note": "",
    "done": 1,
    "updatedAt": 1793017358231
@@ -738,40 +738,12 @@
    "note": ""
   },
   {
-   "id": 3,
-   "type": "协作流程",
-   "link": "https://my.feishu.cn/wiki/Go3lw5N5EiR0BukvrP4c6bfXnAg",
-   "name": "各部门跨部门协作流程",
-   "updatedAt": 1793017358231
-  },
-  {
    "id": 4,
    "type": "刊例及接单标准",
    "link": "https://my.feishu.cn/docx/AIUvdGS7ioLfN6xxdJNcswHnnjh?from=from_parent_docx",
    "name": "MCN协作/接单标准",
    "updatedAt": 1793017358231,
    "note": ""
-  },
-  {
-   "id": 5,
-   "type": "销售学习",
-   "link": "https://vcn1s0k19p68.feishu.cn/wiki/LmIAwIW4iiwuUdk9h6acKn19nwh",
-   "name": "销售学习/散客报价/年框",
-   "updatedAt": 1793017358231
-  },
-  {
-   "id": 6,
-   "type": "冲榜SOP",
-   "link": "https://my.feishu.cn/wiki/Dj8vw7MIaia80LkFv6ZcdVHCnze",
-   "name": "抖音基础冲榜流程",
-   "updatedAt": 1793017358231
-  },
-  {
-   "id": 7,
-   "type": "冲榜SOP",
-   "link": "https://my.feishu.cn/wiki/ZaznwRvi4iba8TkySmLcVYA3nBb",
-   "name": "微博冲榜流程",
-   "updatedAt": 1793017358231
   },
   {
    "id": 8,
@@ -865,6 +837,34 @@
    "updatedAt": 1793017358231
   },
   {
+   "id": 3,
+   "type": "协作流程",
+   "link": "https://my.feishu.cn/wiki/Go3lw5N5EiR0BukvrP4c6bfXnAg",
+   "name": "各部门跨部门协作流程",
+   "updatedAt": 1793017358231
+  },
+  {
+   "id": 5,
+   "type": "销售学习",
+   "link": "https://vcn1s0k19p68.feishu.cn/wiki/LmIAwIW4iiwuUdk9h6acKn19nwh",
+   "name": "销售学习/散客报价/年框",
+   "updatedAt": 1793017358231
+  },
+  {
+   "id": 6,
+   "type": "冲榜SOP",
+   "link": "https://my.feishu.cn/wiki/Dj8vw7MIaia80LkFv6ZcdVHCnze",
+   "name": "抖音基础冲榜流程",
+   "updatedAt": 1793017358231
+  },
+  {
+   "id": 7,
+   "type": "冲榜SOP",
+   "link": "https://my.feishu.cn/wiki/ZaznwRvi4iba8TkySmLcVYA3nBb",
+   "name": "微博冲榜流程",
+   "updatedAt": 1793017358231
+  },
+  {
    "link": "https://sso.oceanengine.com/xingtu/login?role=1",
    "type": "星图下单",
    "name": "星图平台",
@@ -947,14 +947,6 @@
  ],
  "reviews": [
   {
-   "id": 1,
-   "project": "百度文库-WAIC",
-   "good": "节奏把控好,投流及时",
-   "improve": "审核需加checklist",
-   "reusable": "发布SOP可复用",
-   "updatedAt": 1793017358231
-  },
-  {
    "id": 2,
    "project": "希尔X盈香",
    "good": "策略详细,出词快",
@@ -980,6 +972,14 @@
    "id": 4,
    "kind": "review",
    "editedAt": 1786936786975,
+   "updatedAt": 1793017358231
+  },
+  {
+   "id": 1,
+   "project": "百度文库-WAIC",
+   "good": "节奏把控好,投流及时",
+   "improve": "审核需加checklist",
+   "reusable": "发布SOP可复用",
    "updatedAt": 1793017358231
   }
  ],
