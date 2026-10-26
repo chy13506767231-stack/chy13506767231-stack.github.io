@@ -367,11 +367,13 @@ textarea{resize:vertical;min-height:70px}
       </div>
     </div>
     <div class="header-mascot">
+      <button id="wallpaper-btn" title="更换壁纸" style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.45);border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;margin-right:2px;backdrop-filter:blur(4px);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.45)'" onmouseout="this.style.background='rgba(255,255,255,.25)'">🖼️</button>
       <img class="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴">
     </div>
   </div>
   <div class="pipeline-bar" id="pipeline-bar"></div>
 </div>
+<input type="file" id="wallpaper-file" accept="image/*" style="display:none">
 
 <!-- 10 个大 TAB 全部平铺，顺序固定，无「更多」下拉 -->
 <div class="layout">
