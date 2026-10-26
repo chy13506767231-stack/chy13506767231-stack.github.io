@@ -373,7 +373,14 @@ textarea{resize:vertical;min-height:70px}
     </div>
     <div class="header-mascot">
       <button id="wallpaper-btn" title="更换壁纸（右键恢复默认）" style="background:transparent;border:none;cursor:pointer;width:44px;height:60px;padding:0;margin-right:2px;display:flex;align-items:center;justify-content:center;transition:transform .15s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'"><img src="assets/kitty-btn.png" alt="更换壁纸" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none"></button>
-      <img class="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴" onclick="this.classList.toggle('paused')" title="点我暂停/继续">
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center">
+        <img class="boys-header" id="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴" onclick="boysClick()" title="点击暂停/继续轮换">
+        <div style="display:flex;gap:3px;margin-top:2px">
+          <button id="boys-add-btn" title="添加头像图" onclick="document.getElementById('boys-file').click()" style="background:rgba(255,255,255,.55);border:none;border-radius:8px;width:20px;height:16px;font-size:10px;line-height:1;cursor:pointer;color:#5a6470;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(60,70,90,.2);padding:0">＋</button>
+          <button id="boys-swap-btn" title="立即换一张" onclick="boysSwap(true)" style="background:rgba(255,255,255,.55);border:none;border-radius:8px;width:20px;height:16px;font-size:10px;line-height:1;cursor:pointer;color:#5a6470;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(60,70,90,.2);padding:0">⇄</button>
+        </div>
+        <input type="file" id="boys-file" accept="image/*" style="display:none" onchange="boysUpload(this)">
+      </div>
     </div>
   </div>
   <div class="pipeline-bar" id="pipeline-bar"></div>
