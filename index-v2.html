@@ -2328,25 +2328,25 @@ function linkModal(key,id){
     };
   }
   function wbApply(url,c){
-    var h=document.querySelector('.header');
-    if(h){
-      h.style.backgroundImage='linear-gradient(120deg,hsla(0,0%,0%,0),'+'hsla(0,0%,0%,0)),url("'+url+'")';
-      h.style.backgroundImage='linear-gradient(120deg,rgba(40,44,58,.42),rgba(40,44,58,.18)),url("'+url+'")';
-      h.style.backgroundSize='cover';
-      h.style.backgroundPosition='center';
-    }
+    /* 全页固定背景层：铺满视口，位于所有内容之后 */
+    var bg=document.getElementById('wall-bg');
+    if(!bg){bg=document.createElement('div');bg.id='wall-bg';document.body.insertBefore(bg,document.body.firstChild);}
+    bg.style.cssText='position:fixed;inset:0;z-index:-1;background:url("'+url+'") center/cover no-repeat;pointer-events:none';
     var rs=document.documentElement.style;
     rs.setProperty('--pri',c.accent);rs.setProperty('--blue-d',c.accent);
     rs.setProperty('--blue',c.soft);rs.setProperty('--green',c.soft);
     rs.setProperty('--blue-50',c.bg);rs.setProperty('--green-light',c.bg);
     rs.setProperty('--pink',c.soft);rs.setProperty('--pink-d',c.accent);
     rs.setProperty('--pink-50',c.bg);rs.setProperty('--bg',c.bg);
+    /* 玻璃质感：header 半透深色玻璃（保白字可读），侧栏/卡片半透白玻璃 */
     var st=document.getElementById('wall-style');
     if(!st){st=document.createElement('style');st.id='wall-style';document.head.appendChild(st);}
-    st.textContent='body{background-image:radial-gradient(circle at 18px 18px,'
-      +c.accent.replace('hsl','hsla').replace(')',',.14)')+' 3px,transparent 4px),'
-      +'radial-gradient(circle at 58px 42px,'
-      +c.soft.replace('hsl','hsla').replace(')',',.16)')+' 3px,transparent 4px)!important}';
+    st.textContent='body{background-image:none!important;background-color:transparent!important}'
+      +'.header{background:linear-gradient(120deg,rgba(30,34,48,.40),rgba(30,34,48,.22))!important;backdrop-filter:blur(14px) saturate(1.25);-webkit-backdrop-filter:blur(14px) saturate(1.25)!important}'
+      +'.header::after{display:none!important}'
+      +'.tab-nav{background:rgba(255,255,255,.55)!important;backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3)!important}'
+      +'.card,.theme-morandi .card,.link-card{background:rgba(255,255,255,.60)!important;backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3)!important}'
+      +'.monitor-result .card{background:rgba(255,255,255,.78)!important}';
   }
   function wbSetWallpaper(file){
     var rd=new FileReader();
