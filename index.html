@@ -2338,7 +2338,8 @@ function linkModal(key,id){
     rs.setProperty('--blue-50',c.bg);rs.setProperty('--green-light',c.bg);
     rs.setProperty('--pink',c.soft);rs.setProperty('--pink-d',c.accent);
     rs.setProperty('--pink-50',c.bg);rs.setProperty('--bg',c.bg);
-    /* 带色玻璃：垫一层主题色底（奶油/淡色），字压实底保证可读；颜色跟随取色结果 */
+    /* 带色玻璃：白纱+固定淡蓝(蓝格纹色板)，不随壁纸取色变化，亮暗区恒定 */
+    var TINT='#c9d6ec';
     function hexA(h,a){h=(h||'#f5efde').replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
     var st=document.getElementById('wall-style');
     if(!st){st=document.createElement('style');st.id='wall-style';document.head.appendChild(st);}
