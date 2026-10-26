@@ -375,7 +375,7 @@ textarea{resize:vertical;min-height:70px}
     </div>
     <div class="header-mascot">
       <button id="wallpaper-btn" title="更换壁纸（右键恢复默认）" style="background:transparent;border:none;cursor:pointer;width:44px;height:60px;padding:0;margin-right:2px;display:flex;align-items:center;justify-content:center;transition:transform .15s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'"><img src="assets/kitty-btn.png" alt="更换壁纸" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none"></button>
-      <img class="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴">
+      <img class="boys-header" src="assets/boys-cutout.png" alt="木木酱の小伙伴" onclick="this.classList.toggle('paused')" title="点我暂停/继续">
     </div>
   </div>
   <div class="pipeline-bar" id="pipeline-bar"></div>
