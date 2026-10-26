@@ -2356,8 +2356,9 @@ function linkModal(key,id){
     var st=document.getElementById('wall-style');
     if(!st){st=document.createElement('style');st.id='wall-style';document.head.appendChild(st);}
     st.textContent='body{background-image:none!important;background-color:transparent!important}'
-      +'.header{background:linear-gradient(120deg,rgba(30,34,48,.40),rgba(30,34,48,.22))!important;backdrop-filter:blur(14px) saturate(1.25);-webkit-backdrop-filter:blur(14px) saturate(1.25)!important}'
+      +'.header{background:transparent!important;backdrop-filter:none;-webkit-backdrop-filter:none!important}'
       +'.header::after{display:none!important}'
+      +'.header,.header *{text-shadow:0 1px 4px rgba(0,0,0,.38),0 0 12px rgba(0,0,0,.18)!important}'
       /* iOS 式毛玻璃：高 blur 均质化背景，字不描边自然可读；无任何光晕 */
       +'.tab-nav{background:linear-gradient(rgba(255,255,255,.22),rgba(255,255,255,.22)),'+hexA(TINT,.26)+'!important;backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3)!important;box-shadow:0 2px 14px rgba(60,70,90,.08)}'
       +'.card,.theme-morandi .card,.link-card{background:linear-gradient(rgba(255,255,255,.20),rgba(255,255,255,.20)),'+hexA(TINT,.24)+'!important;backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3)!important}'
