@@ -2445,6 +2445,60 @@ function linkModal(key,id){
         }catch(e){}
       });
   })();
+
+  /* ===== 顶部头像池：每10分钟随机轮换，点击暂停/继续，+号添加新图 ===== */
+  var boysPool=[],boysIdx=-1,boysTimer=null,boysRotating=true;
+  function boysShow(i){
+    if(!boysPool.length)return;
+    boysIdx=(i+boysPool.length)%boysPool.length;
+    var img=document.getElementById('boys-header');
+    img.style.opacity=0;
+    setTimeout(function(){img.src=boysPool[boysIdx]+(boysPool[boysIdx].indexOf('?')>-1?'&':'?')+'_t='+Date.now();img.style.opacity=1;},200);
+  }
+  function boysRand(pick){
+    if(boysPool.length<2)return;
+    var n;do{n=Math.floor(Math.random()*boysPool.length)}while(n===boysIdx);
+    boysShow(n);
+  }
+  function boysSwap(manual){
+    if(manual&&!boysRotating){boysRotating=true;boysStart();document.getElementById('boys-header').style.opacity=1;}
+    boysRand();
+  }
+  function boysClick(){
+    boysRotating=!boysRotating;
+    if(boysRotating){boysStart();}
+    else{if(boysTimer){clearInterval(boysTimer);boysTimer=null;}}
+    var img=document.getElementById('boys-header');
+    img.style.opacity=boysRotating?1:.75;
+  }
+  function boysStart(){
+    if(boysTimer)clearInterval(boysTimer);
+    boysTimer=setInterval(boysRand,10*60*1000);
+  }
+  function boysUpload(input){
+    var f=input.files&&input.files[0];if(!f)return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      fetch('/api/header-pool',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({data:rd.result})})
+      .then(function(r){return r.json()}).then(function(j){
+        input.value='';
+        if(j&&j.ok&&j.img){boysPool.push(j.img+'?_t='+Date.now());boysShow(boysPool.length-1);}
+        else{alert('保存失败：'+(j&&j.err||'未知错误'));}
+      }).catch(function(){input.value='';alert('保存失败：本机服务未响应');});
+    };
+    rd.readAsDataURL(f);
+  }
+  (function(){
+    var img=document.getElementById('boys-header');
+    fetch('/api/header-pool').then(function(r){return r.ok?r.json():null}).then(function(j){
+      if(j&&j.ok&&j.imgs&&j.imgs.length){
+        boysPool=j.imgs.map(function(u){return u});
+        boysRand();
+      }
+    }).catch(function(){/* 手机端无后端：保留默认图 */});
+    boysStart();
+  })();
 })();
 </script>
 </body>
