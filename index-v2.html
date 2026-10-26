@@ -2282,5 +2282,123 @@ function linkModal(key,id){
 
 })();
 </script>
+<script>
+/* ===== 更换壁纸：上传 → 压缩 → 自动取色 → 全站配色联动 ===== */
+(function(){
+  var btn=document.getElementById('wallpaper-btn');
+  var fileInput=document.getElementById('wallpaper-file');
+  if(!btn||!fileInput) return;
+  btn.title='更换壁纸（右键/长按恢复默认配色）';
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function wbRgb2hsl(r,g,b){
+    r/=255;g/=255;b/=255;
+    var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2;
+    if(mx===mn){h=0;s=0;}
+    else{
+      var df=mx-mn;
+      s=l>0.5?df/(2-mx-mn):df/(mx+mn);
+      if(mx===r)h=(g-b)/df+(g<b?6:0);
+      else if(mx===g)h=(b-r)/df+2;
+      else h=(r-g)/df+4;
+      h/=6;
+    }
+    return[h*360,s*100,l*100];
+  }
+  /* 降采样统计主色 → 衍生全站配色 */
+  function wbExtractColors(canvas){
+    var s=document.createElement('canvas');s.width=64;s.height=64;
+    var ctx=s.getContext('2d');ctx.drawImage(canvas,0,0,64,64);
+    var d=ctx.getImageData(0,0,64,64).data,buckets={};
+    for(var i=0;i<d.length;i+=4){
+      var k=(d[i]>>4)+','+(d[i+1]>>4)+','+(d[i+2]>>4);
+      if(!buckets[k])buckets[k]=[0,0,0,0];
+      buckets[k][0]+=d[i];buckets[k][1]+=d[i+1];buckets[k][2]+=d[i+2];buckets[k][3]++;
+    }
+    var arr=Object.values(buckets).sort(function(a,b){return b[3]-a[3];});
+    var n=0,R=0,G=0,B=0;
+    for(var j=0;j<Math.min(5,arr.length);j++){R+=arr[j][0];G+=arr[j][1];B+=arr[j][2];n+=arr[j][3];}
+    var hsl=wbRgb2hsl(R/n,G/n,B/n),h=hsl[0],sat=hsl[1],lig=hsl[2];
+    if(sat<10){h=210;sat=26;} /* 灰白照片兜底：雾蓝调 */
+    return{
+      accent:'hsl('+h.toFixed(0)+','+clamp(sat,22,42).toFixed(0)+'%,48%)',
+      soft:'hsl('+h.toFixed(0)+','+clamp(sat*.9,16,36).toFixed(0)+'%,80%)',
+      bg:'hsl('+h.toFixed(0)+','+clamp(sat*1.2,14,30).toFixed(0)+'%,94%)',
+      dark:'hsl('+h.toFixed(0)+','+clamp(sat,12,26).toFixed(0)+'%,30%)'
+    };
+  }
+  function wbApply(url,c){
+    var h=document.querySelector('.header');
+    if(h){
+      h.style.backgroundImage='linear-gradient(120deg,hsla(0,0%,0%,0),'+'hsla(0,0%,0%,0)),url("'+url+'")';
+      h.style.backgroundImage='linear-gradient(120deg,rgba(40,44,58,.42),rgba(40,44,58,.18)),url("'+url+'")';
+      h.style.backgroundSize='cover';
+      h.style.backgroundPosition='center';
+    }
+    var rs=document.documentElement.style;
+    rs.setProperty('--pri',c.accent);rs.setProperty('--blue-d',c.accent);
+    rs.setProperty('--blue',c.soft);rs.setProperty('--green',c.soft);
+    rs.setProperty('--blue-50',c.bg);rs.setProperty('--green-light',c.bg);
+    rs.setProperty('--pink',c.soft);rs.setProperty('--pink-d',c.accent);
+    rs.setProperty('--pink-50',c.bg);rs.setProperty('--bg',c.bg);
+    var st=document.getElementById('wall-style');
+    if(!st){st=document.createElement('style');st.id='wall-style';document.head.appendChild(st);}
+    st.textContent='body{background-image:radial-gradient(circle at 18px 18px,'
+      +c.accent.replace('hsl','hsla').replace(')',',.14)')+' 3px,transparent 4px),'
+      +'radial-gradient(circle at 58px 42px,'
+      +c.soft.replace('hsl','hsla').replace(')',',.16)')+' 3px,transparent 4px)!important}';
+  }
+  function wbSetWallpaper(file){
+    var rd=new FileReader();
+    rd.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        var maxW=1600,sc=Math.min(1,maxW/img.width);
+        var c=document.createElement('canvas');
+        c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        var b64=c.toDataURL('image/jpeg',0.82);
+        var colors=wbExtractColors(c);
+        wbApply(b64,colors);
+        try{localStorage.setItem('wall_colors',JSON.stringify(colors));}catch(e){}
+        fetch('/api/wallpaper',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:b64,colors:colors})})
+          .then(function(r){return r.json();})
+          .then(function(j){
+            if(!j||!j.ok){try{localStorage.setItem('wall_local',b64);}catch(e){}alert('壁纸已本机生效，云端保存失败：'+((j&&j.err)||'未知'));}
+          })
+          .catch(function(){try{localStorage.setItem('wall_local',b64);}catch(e){}alert('当前环境不支持云端保存（手机端正常现象），壁纸已本机生效');});
+      };
+      img.src=rd.result;
+    };
+    rd.readAsDataURL(file);
+  }
+  btn.addEventListener('click',function(){fileInput.click();});
+  fileInput.addEventListener('change',function(){
+    var f=this.files[0];if(!f)return;wbSetWallpaper(f);this.value='';
+  });
+  /* 右键 / 长按 = 恢复默认 */
+  btn.addEventListener('contextmenu',function(e){
+    e.preventDefault();
+    if(!confirm('恢复默认配色并清除自定义壁纸？'))return;
+    try{localStorage.removeItem('wall_colors');localStorage.removeItem('wall_local');}catch(e){}
+    fetch('/api/wallpaper',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reset:true})}).catch(function(){});
+    setTimeout(function(){location.reload();},300);
+  });
+  /* 启动：读取已保存的壁纸与配色 */
+  try{
+    var savedColors=localStorage.getItem('wall_colors');
+    if(savedColors){
+      var im=new Image();
+      im.onload=function(){wbApply('assets/wallpaper_custom.jpg',JSON.parse(savedColors));};
+      im.onerror=function(){
+        /* PC 无文件时尝试本机缓存（手机端降级路径） */
+        var local=localStorage.getItem('wall_local');
+        if(local)wbApply(local,JSON.parse(savedColors));
+      };
+      im.src='assets/wallpaper_custom.jpg?_t='+Date.now();
+    }
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
