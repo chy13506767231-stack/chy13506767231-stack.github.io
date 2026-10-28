@@ -2478,15 +2478,27 @@ function linkModal(key,id){
   }
   function boysUpload(input){
     var f=input.files&&input.files[0];if(!f)return;
+    var addBtn=document.getElementById('boys-add-btn');
+    var oldLabel=addBtn.textContent;
+    addBtn.textContent='…'; addBtn.style.opacity=.5; addBtn.style.pointerEvents='none';
     var rd=new FileReader();
     rd.onload=function(){
       fetch('/api/header-pool',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({data:rd.result})})
       .then(function(r){return r.json()}).then(function(j){
         input.value='';
-        if(j&&j.ok&&j.img){boysPool.push(j.img+'?_t='+Date.now());boysShow(boysPool.length-1);}
-        else{alert('保存失败：'+(j&&j.err||'未知错误'));}
-      }).catch(function(){input.value='';alert('保存失败：本机服务未响应');});
+        addBtn.textContent=oldLabel; addBtn.style.opacity=1; addBtn.style.pointerEvents='';
+        if(j&&j.ok&&j.img){
+          boysPool.push(j.img+'?_t='+Date.now());boysShow(boysPool.length-1);
+          // 明确反馈：抠成 / 未抠成（未抠成会存原图，提示可重试）
+          toast(j.cut?'✓ 已自动抠图':'⚠ 自动抠图未成功，已保留原图（可重试）', 2600);
+        }
+        else{toast('保存失败：'+(j&&j.err||'未知错误'), 3000);}
+      }).catch(function(){
+        input.value='';
+        addBtn.textContent=oldLabel; addBtn.style.opacity=1; addBtn.style.pointerEvents='';
+        toast('保存失败：本机服务未响应', 3000);
+      });
     };
       rd.readAsDataURL(f);
   }
