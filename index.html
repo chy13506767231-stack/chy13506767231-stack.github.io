@@ -354,6 +354,10 @@ textarea{resize:vertical;min-height:70px}
 .drag-item.dragging .drag-h{cursor:grabbing}
 .drag-over-a{box-shadow:inset 0 3px 0 0 var(--pink,#d3ddee)}
 .drag-over-b{box-shadow:inset 0 -3px 0 0 var(--pink,#d3ddee)}
+/* 头部标题/副标题：可点击编辑 */
+#header-name-txt,#header-sub-txt{cursor:text;border-radius:6px;transition:box-shadow .15s}
+#header-name-txt:hover,#header-sub-txt:hover{box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+#header-name-txt:focus,#header-sub-txt:focus{outline:none;box-shadow:0 0 0 1.5px rgba(255,255,255,.75);background:rgba(255,255,255,.12)}
 
 </style>
 </head>
@@ -702,7 +706,44 @@ function renderHeader(){
   refreshDailyChips();
   var dr=document.getElementById("daily-refresh");
   if(dr&&!dr.dataset.bound){dr.dataset.bound="1";dr.addEventListener("click",refreshDaily);}
+  applyHeaderTexts();
 }
+
+/* ================= 头部标题/副标题：点击直接修改 =================
+   存在 S.manual._headerName / _headerSub（复用手动排序的整对象 LWW 同步通道），
+   Mac 上改完自动存 localStorage + 推云端；手机刷新后会跟随云端显示。 */
+function applyHeaderTexts(){
+  [["_headerName","header-name-txt"],["_headerSub","header-sub-txt"]].forEach(function(cfg){
+    var el=document.getElementById(cfg[1]);
+    if(!el)return;
+    var v=S.manual&&S.manual[cfg[0]];
+    if(typeof v==="string"&&v.trim()&&document.activeElement!==el)el.textContent=v.trim();
+  });
+}
+(function(){
+  [["header-name-txt","_headerName","标题"],["header-sub-txt","_headerSub","副标题"]].forEach(function(cfg){
+    var el=document.getElementById(cfg[0]);
+    if(!el||el.dataset.hdrBound)return;
+    el.dataset.hdrBound="1";
+    var orig=el.textContent;
+    el.addEventListener("focus",function(){orig=el.textContent;});
+    el.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();el.blur();}});
+    el.addEventListener("paste",function(e){ /* 只收纯文本，防止粘贴进外部样式 */
+      e.preventDefault();
+      var t="";try{t=(e.clipboardData||window.clipboardData).getData("text/plain")||""}catch(_e){}
+      document.execCommand("insertText",false,t.replace(/\s+/g," ").trim());
+    });
+    el.addEventListener("blur",function(){
+      var txt=el.textContent.replace(/\s+/g," ").trim()||orig; /* 改空则回退原文字 */
+      el.textContent=txt;
+      S.manual=S.manual||{};
+      if(S.manual[cfg[1]]!==txt){
+        S.manual[cfg[1]]=txt;S.manualTS=Date.now();S.save();
+        toast(cfg[2]+"已更新，已自动保存");
+      }
+    });
+  });
+})();
 
 /* ================= 每日运势/注意 chip 弹窗 ================= */
 function todayStr(){
