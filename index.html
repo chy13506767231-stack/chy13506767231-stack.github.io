@@ -1274,9 +1274,34 @@ function importHot(){
     items.forEach(function(it){
       /* 已完成项目的热点不导入（服务器已过滤，这里再兜底一次；用容错识别，兼容项目名缩写） */
       if(it.project&&projIsDone(it.project)){skipped++;return}
-      var existing=S.news.find(function(n){return n.title===it.title});
-      if(!existing){S.news.push({id:S.nid(S.news),date:todayMD(),source:srcMap[it.source]||it.source,title:it.title,summary:it.kw?("命中关键词："+it.kw):"",project:it.project||"",link:it.link||""});added++}
+      var existing=S.news.find(function(n){return n.title===it.title && n.project===(it.project||"")});
+      if(!existing){
+        S.news.push({
+          id:S.nid(S.news),date:todayMD(),
+          source:srcMap[it.source]||it.source,
+          title:it.title,
+          summary:it.kw?("命中关键词："+it.kw):"",
+          project:it.project||"",link:it.link||"",
+          redfox:!!it.redfox, exact:!!it.exact,
+          type:it.type||"hot", rankHint:it.rankHint||"",
+          author:it.author||"", authorLink:it.authorLink||"",
+          like:it.like||0, collect:it.collect||0, comment:it.comment||0,
+          share:it.share||0, interactive:it.interactive||0, fans:it.fans||0
+        });
+        added++
+      }
       else if(it.link&&!existing.link){existing.link=it.link;updated++} /* 已有同名热点但没链接 → 补上 */
+      if(it.redfox&&existing){ /* 红狐条目补全互动数据/作者 */
+        existing.redfox=true; existing.type=it.type||existing.type;
+        existing.author=existing.author||it.author||"";
+        existing.authorLink=existing.authorLink||it.authorLink||"";
+        existing.like=it.like||existing.like||0;
+        existing.collect=it.collect||existing.collect||0;
+        existing.comment=it.comment||existing.comment||0;
+        existing.share=it.share||existing.share||0;
+        existing.interactive=it.interactive||existing.interactive||0;
+        existing.fans=it.fans||existing.fans||0;
+      }
     });
     S.news=S.news.filter(function(n){
       if(!n.project)return true;
