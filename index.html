@@ -1202,12 +1202,22 @@ function rn(){
           html+='<div class="news-grid">';
           list.forEach(function(n){
             var lk=newsLink(n);
+            var rbadge = n.redfox ? (n.type==="redfox_rank"
+                ? '<span class="badge" style="background:#c45b8a;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🏆红狐·赛道爆款</span> '
+                : '<span class="badge" style="background:#2f7d8c;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🔍红狐·精准</span> ') : '';
+            var stat = (n.redfox && (n.interactive||n.like||n.collect))
+                ? '<div class="text-xs" style="color:#6a7a8c;margin-top:2px">🔥互动 '+fmtNum(n.interactive)
+                  +' · 👍'+fmtNum(n.like)+' ⭐'+fmtNum(n.collect)
+                  +(n.author?(' · <a href="'+esc(n.authorLink||"#")+'" target="_blank" rel="noopener" style="color:#6a7a8c">'+esc(n.author)+'</a>'):'')
+                  +'</div>' : '';
             html+='<div class="drag-item news-card" data-drag-id="'+n.id+'"><div class="row row-between"><div>'
               +(n.type==="content"?'<span class="badge" style="background:#7b8bab;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">📄内容监测</span> ':'')
+              +rbadge
               +'<span class="text-xs">'+esc(n.date||"")+'</span></div>'
               +'<div class="sh0"><button class="btn-ghost" data-nw-edit="'+n.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-nw-del="'+n.id+'">✕</button></div></div>'
               +'<div style="font-weight:600;font-size:12px;margin:4px 0">'+esc(n.title)+'</div>'
               +(n.summary?'<div class="text-xs">'+esc(n.summary)+'</div>':'')
+              +stat
               +(lk?'<div class="news-link"><a href="'+esc(lk)+'" target="_blank" rel="noopener">🔗 查看原文</a></div>':'')
               +'</div>';
           });
