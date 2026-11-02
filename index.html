@@ -1149,6 +1149,7 @@ function rpd(){
 }
 
 /* ================= 5. 热点资讯 ================= */
+function fmtNum(v){v=Number(v)||0; return v>=10000 ? (v/10000).toFixed(1)+"w" : String(v);}
 function rn(){
   /* 手动监测子窗口置顶：话题词上榜 / 链接读取（基于 Agent Reach） */
   var html='<section class="monitor-box" style="margin-bottom:18px"><h3 class="news-proj-title">🔍 手动监测</h3>'
