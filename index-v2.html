@@ -1208,8 +1208,6 @@ function rn(){
   /* 通用 / 文娱 / 社会 / 项目命中 分类 tab（通用+文娱/社会为通用板块；项目命中仅项目命中） */
   html+='<div class="news-tabs">'
     +'<button class="news-tab'+(NW_TAB==="general"?" active":"")+'" data-nw-tab="general">📡 通用</button>'
-    +'<button class="news-tab'+(NW_TAB==="wen"?" active":"")+'" data-nw-tab="wen">🎬 文娱</button>'
-    +'<button class="news-tab'+(NW_TAB==="she"?" active":"")+'" data-nw-tab="she">🌐 社会</button>'
     +'<button class="news-tab'+(NW_TAB==="proj"?" active":"")+'" data-nw-tab="proj">🎯 项目命中</button>'
     +'</div>';
 
@@ -1227,16 +1225,16 @@ function rn(){
   visNews=orderItems(visNews,"news",function(n){return n.id});
 
   if(NW_TAB==="proj"){
-    /* 项目命中：只显示「项目关键词命中」的条目（match===true），不再混入通用热点 */
+    /* 项目命中：只显示「项目关键词命中」的条目（match===true），多列网格展示 */
     html+=newsByProjectHTML(visNews.filter(function(n){return n.match}));
   } else {
-    var list=visNews.filter(function(n){
-      if(NW_TAB==="general")return !n.match;                         /* 通用：所有非项目命中（平台监测+手动） */
-      if(NW_TAB==="wen")return !n.match && (n.cat||"she")==="wen";   /* 文娱：通用里归类为文娱的 */
-      if(NW_TAB==="she")return !n.match && (n.cat||"she")==="she";   /* 社会：通用里归类为社会 */
-      return true;
-    });
-    html+=newsCardsHTML(list);
+    /* 通用：左 文娱榜 / 右 社会榜 双列（均为非项目命中的平台监测+手动热点） */
+    var wenList=visNews.filter(function(n){return !n.match && (n.cat||"she")==="wen";});
+    var sheList=visNews.filter(function(n){return !n.match && (n.cat||"she")==="she";});
+    html+='<div class="news-dual">'
+      +'<div class="news-col"><div class="news-col-hd">🎬 文娱榜 <span class="news-proj-count">'+wenList.length+'</span></div>'+newsListHTML(wenList)+'</div>'
+      +'<div class="news-col"><div class="news-col-hd">🌐 社会榜 <span class="news-proj-count">'+sheList.length+'</span></div>'+newsListHTML(sheList)+'</div>'
+      +'</div>';
   }
   document.getElementById("pnl-news").innerHTML=html;
   bindDrag("pnl-news","news");
@@ -1304,6 +1302,11 @@ function newsCardsHTML(list){
   });
   return html;
 }
+/* 单列卡片列表（用于通用双列的文娱/社会榜，垂直堆叠） */
+function newsListHTML(list){
+  if(!list.length)return '<div class="empty">该榜单暂无热点（点「导入抓取热点」刷新，或在项目里填抓取关键词）</div>';
+  return list.map(newsCardRow).join("");
+}
 /* 项目命中视图：按项目→平台分组（仅在「项目命中」tab 用） */
 function newsByProjectHTML(visNews){
   if(!visNews.length)return '<div class="empty">暂无「项目命中」热点（在项目里填抓取关键词，或点「导入抓取热点」刷新；已完成项目已自动隐藏）</div>';
@@ -1327,7 +1330,7 @@ function newsByProjectHTML(visNews){
       items.forEach(function(n){var s=n.source||"其他";if(!bySrc[s]){bySrc[s]=[];srcOrder.push(s);}bySrc[s].push(n);});
       srcOrder.forEach(function(sn){
         var list=bySrc[sn];
-        html+='<div class="news-src-label">'+esc(sn)+' <span class="news-proj-count">'+list.length+'</span></div><div class="news-grid">';
+        html+='<div class="news-src-label">'+esc(sn)+' <span class="news-proj-count">'+list.length+'</span></div><div class="news-hit-grid">';
         list.forEach(function(n){html+=newsCardRow(n);});
         html+='</div>';
       });
