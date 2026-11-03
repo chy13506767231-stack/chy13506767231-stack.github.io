@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/docx-preview/dist/docx-preview.min.js"></script>
 <style>
 :root{
-  --bg:#f7f0dd; --card:#fff; --text:#4a4a52; --t2:#8793a5; --t3:#aab3c2;
+  --bg:#f7f0dd; --card:#fff; --text:#4a4a52; --t2:#5e6c82; --t3:#aab3c2;
   --pri:#7c99c8;
   --blue-50:#f7f0dd; --blue:#d4deef; --blue-d:#7c99c8;
   --pink-50:#eef2f9; --pink:#d3ddee; --pink-d:#a9bcdd;
@@ -255,6 +255,16 @@ textarea{resize:vertical;min-height:70px}
 .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
 .news-grid .news-card{margin-bottom:0;border-left:3px solid var(--pink);background:#fff;border-radius:8px;padding:8px 10px}
 .news-grid .news-card .text-xs{color:var(--muted)}
+/* 通用双列：文娱榜 | 社会榜 */
+.news-dual{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.news-col{min-width:0}
+.news-col-hd{font-size:13px;font-weight:700;margin:2px 0 10px;padding:6px 10px;border-radius:8px;background:linear-gradient(90deg,#f6eafb,#eaf1fb);border-left:3px solid var(--pink)}
+.news-col .empty{margin-top:0}
+/* 项目命中：双列网格 */
+.news-hit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.news-hit-grid .news-card{margin-bottom:0;background:#fff;border-radius:8px;padding:8px 10px}
+.news-hit-grid .news-card .text-xs{color:var(--muted)}
+@media(max-width:680px){.news-dual,.news-hit-grid{grid-template-columns:1fr}}
 /* 手动监测子窗口 */
 .monitor-box{margin-top:16px;border-top:2px solid var(--pink);padding-top:12px}
 .monitor-result{margin-top:10px}
