@@ -1215,10 +1215,13 @@ function rn(){
 
   var doneProjs=S.projects.filter(function(p){return p.status==="已完成"}).map(function(p){return p.name});
   var validProjNames=S.projects.map(function(p){return p.name});
+  /* 通用/平台监测条目（match 为假）始终显示；仅项目命中条目按关联项目生命周期过滤（前缀容错，兼容项目名缩写/错配） */
   var visNews=S.news.filter(function(n){
-    if(!n.project)return true;
-    if(validProjNames.indexOf(n.project)<0)return false;
-    if(projIsDone(n.project))return false;
+    if(n.match && n.project){
+      var alive=validProjNames.some(function(v){return v===n.project || v.indexOf(n.project)===0 || n.project.indexOf(v)===0;});
+      if(!alive)return false;
+      if(projIsDone(n.project))return false;
+    }
     return true;
   });
   visNews=orderItems(visNews,"news",function(n){return n.id});
