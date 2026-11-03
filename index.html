@@ -1528,6 +1528,7 @@ function rtp(){
   bindDrag("pnl-templates","templates");
   document.querySelectorAll("[data-tcat]").forEach(function(b){b.addEventListener("click",function(){tcat=b.dataset.tcat;rtp()})});
   document.getElementById("add-tp-btn").addEventListener("click",function(){tplModal(null)});
+  document.getElementById("gen-order-btn").addEventListener("click",function(){genOrderModal()});
   document.querySelectorAll("[data-tp-copy]").forEach(function(b){
     b.addEventListener("click",function(){var t=S.templates.find(function(x){return x.id===+b.dataset.tpCopy});if(t)copyText(t.body)});
   });
@@ -1555,6 +1556,109 @@ function tplModal(id){
     if(t){Object.assign(t,data)}else{data.id=S.nid(S.templates);S.templates.push(data)}
     S.save();cmod();rtp();
   });
+}
+/* 智能生成下单内容：填项目信息 + 选模板（即「在哪下单」）→ 自动套用生成可复制内容 */
+function genOrderModal(){
+  var d=S.manual.orderDraft||{};
+  var cats={};
+  S.templates.forEach(function(t){(cats[t.cat]=cats[t.cat]||[]).push(t)});
+  var tplOpts='<option value="">（不选模板 · 仅生成项目信息摘要）</option>';
+  Object.keys(cats).forEach(function(c){
+    tplOpts+='<optgroup label="'+esc(c)+'">'+cats[c].map(function(t){
+      return '<option value="'+t.id+'"'+(+d.tplId===t.id?' selected':'')+'>'+esc(t.name)+(t.dept?'（'+esc(t.dept)+'）':'')+'</option>';
+    }).join("")+'</optgroup>';
+  });
+  function fg(id,label,val,ph){return '<div class="fg"><label>'+label+'</label><input id="'+id+'" value="'+esc(val||"")+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'></div>';}
+  omod('<h3>🪄 智能生成下单内容</h3>'
+    +'<p class="text-xs" style="margin:0 0 12px">填写项目信息，选择对应模板（即「在哪下单」），自动套用生成可复制粘贴的内容。模板支持 <code>{{占位符}}</code> 与空 <code>【字段】</code> 两种自动填充。</p>'
+    +'<div class="gen-order">'
+    +'<div class="go-fields">'
+    +fg("go-projName","项目名称",d.projName)
+    +fg("go-brand","品牌/客户",d.brand)
+    +fg("go-platform","投放平台",d.platform,"抖音 / 小红书 / 微博")
+    +fg("go-account","投放账号",d.account)
+    +fg("go-budget","预算/金额",d.budget)
+    +fg("go-schedule","排期/时间",d.schedule)
+    +'<div class="fg"><label>需求说明</label><textarea id="go-req" rows="3" placeholder="核心诉求 / KPI / 形式 / 话题方向">'+esc(d.req||"")+'</textarea></div>'
+    +'<div class="fg"><label>补充信息（可粘贴任意项目 brief / 自由描述）</label><textarea id="go-free" rows="3">'+esc(d.free||"")+'</textarea></div>'
+    +'<div class="fg"><label>选择模板（即「在哪下单」）</label><select id="go-tpl">'+tplOpts+'</select></div>'
+    +'<label class="go-chk"><input type="checkbox" id="go-append"'+(d.append?" checked":"")+'> 末尾始终附带完整项目信息摘要</label>'
+    +'</div>'
+    +'<div class="go-preview"><div class="go-preview-hd">生成结果（一键复制）</div><textarea id="go-out" rows="16" readonly></textarea>'
+    +'<div class="row row-end gap-4 mt-8"><button class="btn" id="go-close">关闭</button><button class="btn btn-primary" id="go-copy">📋 复制结果</button></div></div>'
+    +'</div>');
+  var md=document.querySelector(".modal"); if(md)md.classList.add("modal-wide");
+
+  function readFields(){
+    return {
+      projName:document.getElementById("go-projName").value.trim(),
+      brand:document.getElementById("go-brand").value.trim(),
+      platform:document.getElementById("go-platform").value.trim(),
+      account:document.getElementById("go-account").value.trim(),
+      budget:document.getElementById("go-budget").value.trim(),
+      schedule:document.getElementById("go-schedule").value.trim(),
+      req:document.getElementById("go-req").value.trim(),
+      free:document.getElementById("go-free").value.trim()
+    };
+  }
+  function persist(f){
+    S.manual.orderDraft={projName:f.projName,brand:f.brand,platform:f.platform,account:f.account,budget:f.budget,schedule:f.schedule,req:f.req,free:f.free,tplId:+document.getElementById("go-tpl").value||"",append:document.getElementById("go-append").checked};
+    DB.s("manual",S.manual);
+  }
+  function valOf(label,f){
+    var k=label.replace(/\s/g,"");
+    if(k==="项目名称"||k==="项目名"||k==="项目"||k==="项目/品牌名")return f.projName;
+    if(k==="品牌"||k==="客户"||k==="客户主体"||k==="客户组")return f.brand;
+    if(k==="平台"||k==="投放平台")return f.platform;
+    if(k==="账号"||k==="投放账号"||k==="账号数量"||k==="外部账号数量"||k==="内部账号数量"||k==="星图/水下数量")return f.account;
+    if(k==="预算"||k==="金额"||k==="项目金额"||k==="平台金额"||k==="投流预算")return f.budget;
+    if(k==="排期"||k==="时间"||k==="执行日期"||k==="发布时间"||k==="下单时间"||k==="提交时间"||k==="合作秒数"||k==="执行时间"||k==="反馈时间")return f.schedule;
+    if(k==="需求"||k==="项目需求"||k==="需求说明"||k==="项目内容"||k==="内容方向"||k==="提词需求")return f.req;
+    return null;
+  }
+  function infoBlock(f){
+    var lines=["【项目信息】"];
+    if(f.projName)lines.push("· 项目名称："+f.projName);
+    if(f.brand)lines.push("· 品牌/客户："+f.brand);
+    if(f.platform)lines.push("· 投放平台："+f.platform);
+    if(f.account)lines.push("· 投放账号："+f.account);
+    if(f.budget)lines.push("· 预算/金额："+f.budget);
+    if(f.schedule)lines.push("· 排期/时间："+f.schedule);
+    if(f.req)lines.push("· 需求说明："+f.req);
+    if(f.free)lines.push("· 补充信息："+f.free);
+    return lines.join("\n");
+  }
+  function anyInfo(f){return f.projName||f.brand||f.platform||f.account||f.budget||f.schedule||f.req||f.free;}
+  function gen(){
+    var f=readFields();
+    var tId=+document.getElementById("go-tpl").value;
+    var t=tId?S.templates.find(function(x){return x.id===tId}):null;
+    var out=t?t.body:"";
+    /* 1) {{占位符}} 替换 */
+    var ph={"项目名称":f.projName,"品牌":f.brand,"客户":f.brand,"平台":f.platform,"账号":f.account,"预算":f.budget,"金额":f.budget,"排期":f.schedule,"时间":f.schedule,"需求说明":f.req,"需求":f.req,"商务":"","备注":"","项目信息":infoBlock(f),"自由信息":f.free};
+    out=out.replace(/\{\{\s*([^}]+?)\s*\}\}/g,function(m,k){var v=ph[k.trim()];return v==null?"":v;});
+    /* 2) 智能填充空的 【字段】 行 */
+    var filled=0;
+    out=out.replace(/【([^】]+)】([ \t]*)(?=\n|$)/g,function(m,label){
+      var v=valOf(label,f);
+      if(v){filled++;return "【"+label+"】"+v;}
+      return m;
+    });
+    /* 3) 未填充且有信息 → 末尾附摘要 */
+    if(filled===0 && anyInfo(f)){ out=(out+"\n\n"+infoBlock(f)).trim(); }
+    /* 4) 勾选始终附摘要 */
+    if(document.getElementById("go-append").checked && anyInfo(f)){ out=(out+"\n\n"+infoBlock(f)).trim(); }
+    document.getElementById("go-out").value=out;
+    persist(f);
+  }
+  ["go-projName","go-brand","go-platform","go-account","go-budget","go-schedule","go-req","go-free"].forEach(function(id){
+    document.getElementById(id).addEventListener("input",gen);
+  });
+  document.getElementById("go-tpl").addEventListener("change",gen);
+  document.getElementById("go-append").addEventListener("change",gen);
+  document.getElementById("go-close").addEventListener("click",cmod);
+  document.getElementById("go-copy").addEventListener("click",function(){copyText(document.getElementById("go-out").value)});
+  gen();
 }
 
 /* ================= 7. 重要文档管理 ================= */
