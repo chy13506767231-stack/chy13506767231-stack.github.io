@@ -577,7 +577,7 @@ function orderItems(arr,key,idFn){
   var known=[],unknown=[];
   arr.forEach(function(x){var id=idFn(x);(id in pos?known:unknown).push(x);});
   known.sort(function(a,b){return pos[idFn(a)]-pos[idFn(b)];});
-  if(key==="projects")return unknown.concat(known);
+  if(key==="projects"||key==="projdocs")return unknown.concat(known);
   return known.concat(unknown);
 }
 var _dragSrc=null;
