@@ -1612,6 +1612,11 @@ function genOrderModal(){
     +'<p class="text-xs" style="margin:0 0 12px">填写项目信息，选择对应模板（即「在哪下单」），自动套用生成可复制粘贴的内容。模板支持 <code>{{占位符}}</code> 与空 <code>【字段】</code> 两种自动填充。</p>'
     +'<div class="gen-order">'
     +'<div class="go-fields">'
+    +'<div class="fg" style="background:#fff8f0;border:1px dashed #d8b98a;border-radius:10px;padding:10px 12px">'
+      +'<label>📋 一键识别（把收到的项目信息整段贴进来，不用一条条填）</label>'
+      +'<textarea id="go-paste" rows="3" placeholder="格式不限：带「项目名称：xxx」这类标签的全部识别；随意一段话也能识别出平台 / 预算 / 排期 / 诉求"></textarea>'
+      +'<div class="row row-end mt-8"><button class="btn btn-primary btn-sm" id="go-parse">🔍 自动识别并填表</button></div>'
+    +'</div>'
     +fg("go-projName","项目名称",d.projName)
     +fg("go-brand","品牌/客户",d.brand)
     +fg("go-platform","投放平台",d.platform,"抖音 / 小红书 / 微博")
