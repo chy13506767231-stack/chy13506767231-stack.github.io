@@ -1720,6 +1720,7 @@ function genOrderModal(){
       if(/^【?[^【】\[\]:：]{1,14}】?\s*[:：]\s*$/.test(line))return; /* 空值标签行（如「商务：」）跳过 */
       if(/^【[^【】]{1,14}】$/.test(line))return; /* 裸标签行（如「【商务】」）跳过 */
       var m=line.match(/^【?([^【】\[\]:：]{1,14})】?\s*[:：]\s*(.+)$/);
+      if(!m)m=line.match(/^【([^【】]{1,14})】\s*(.+)$/); /* 「【标签】值」无冒号形式 */
       if(m){
         var k=m[1].replace(/[\s\/／]/g,"").toLowerCase(),hit=null;
         for(var i=0;i<labelMap.length;i++){if(labelMap[i][0].test(k)){hit=labelMap[i][1];break}}
