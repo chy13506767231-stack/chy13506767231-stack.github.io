@@ -1702,6 +1702,91 @@ function genOrderModal(){
   document.getElementById("go-append").addEventListener("change",gen);
   document.getElementById("go-close").addEventListener("click",cmod);
   document.getElementById("go-copy").addEventListener("click",function(){copyText(document.getElementById("go-out").value)});
+  /* ===== 一键识别：整段粘贴 → 自动填表 ===== */
+  function parseBrief(text){
+    var f={projName:"",brand:"",platform:"",account:"",budget:"",schedule:"",req:"",free:""};
+    var labelMap=[
+      [/^(项目名称|项目名|案名|项目title|项目|项目\/品牌名|项目名品牌名)$/,"projName"],
+      [/^(品牌|品牌方|客户|客户名|客户主体|甲方|品牌客户)$/,"brand"],
+      [/^(投放平台|平台|渠道|投放渠道|平台渠道)$/,"platform"],
+      [/^(投放账号|账号|达人|达人账号|账号数量|外部账号数量|内部账号数量|星图\/水下数量|水下账号|账号达人)$/,"account"],
+      [/^(预算|预算金额|金额|费用|项目金额|平台金额|投流预算|报价|预算金额)$/,"budget"],
+      [/^(排期|排期时间|时间|执行日期|发布时间|下单时间|提交时间|执行时间|档期|上线时间|交付时间|合作时间|合作秒数|反馈时间)$/,"schedule"],
+      [/^(需求|需求说明|项目需求|核心诉求|诉求|项目内容|内容方向|话题方向|brief|要求|kpi|合作内容|内容需求)$/,"req"]
+    ];
+    var rest=[];
+    text.split(/\n/).forEach(function(raw){
+      var line=raw.trim(); if(!line)return;
+      if(/^【?[^【】\[\]:：]{1,14}】?\s*[:：]\s*$/.test(line))return; /* 空值标签行（如「商务：」）跳过 */
+      var m=line.match(/^【?([^【】\[\]:：]{1,14})】?\s*[:：]\s*(.+)$/);
+      if(m){
+        var k=m[1].replace(/[\s\/／]/g,"").toLowerCase(),hit=null;
+        for(var i=0;i<labelMap.length;i++){if(labelMap[i][0].test(k)){hit=labelMap[i][1];break}}
+        if(hit){if(!f[hit])f[hit]=m[2].trim();return}
+      }
+      rest.push(line);
+    });
+    var blob=rest.join("\n"),bmTxt="",smTxt="";
+    /* 平台：从自由文本里认出常见平台 */
+    var plats=[];["抖音","小红书","微博","B站","快手","视频号","星图"].forEach(function(p){
+      if(blob.toLowerCase().indexOf(p.toLowerCase())>=0&&plats.indexOf(p)<0)plats.push(p);
+    });
+    if(plats.length&&!f.platform)f.platform=plats.join(" / ");
+    /* 预算：优先「预算/费用/报价」附近数字，其次独立的「N万」 */
+    if(!f.budget){
+      var bm=blob.match(/(?:预算|费用|报价|金额)[^\d\n]{0,8}(\d+(?:\.\d+)?)(万|w|W|k|K)?/);
+      if(bm){f.budget=bm[1]+(bm[2]||"万");bmTxt=bm[0];}
+      else{bm=blob.match(/(\d+(?:\.\d+)?)\s*万/);if(bm){f.budget=bm[1]+"万";bmTxt=bm[0];}}
+    }
+    /* 排期：日期区间 / 单日期 */
+    if(!f.schedule){
+      var sm=blob.match(/\d{1,2}\s*[月.]\s*\d{1,2}\s*[日号]?\s*[至\-—~]\s*\d{1,2}\s*[月.]?\s*\d{1,2}\s*[日号]?/);
+      if(!sm)sm=blob.match(/\d{1,2}[./]\d{1,2}\s*[至\-—~]\s*\d{1,2}([./]\d{1,2})?/);
+      if(!sm)sm=blob.match(/\d{1,2}\s*月\s*\d{1,2}\s*[日号]/);
+      if(sm){f.schedule=sm[0].replace(/\s/g,"");smTxt=sm[0];}
+    }
+    /* 账号：@提及 */
+    if(!f.account){
+      var am=blob.match(/(?:^|\n)\s*@[^\s@，,。;；\n]{2,20}/);
+      if(am)f.account=am[0].replace(/(^|\n)\s*@/,"").trim();
+    }
+    /* 项目名兜底：第一条「短且不含数字、不含平台词」的行 */
+    var usedIdx=-1;
+    if(!f.projName){
+      for(var i=0;i<rest.length;i++){
+        var L=rest[i];
+        var isPlat=plats.some(function(p){return L.indexOf(p)>=0});
+        if(L.length<=25&&!/\d/.test(L)&&!isPlat){f.projName=L;usedIdx=i;break}
+      }
+    }
+    /* 剩余文本 → 去掉已识别片段后，req 空则进需求说明，否则进补充信息 */
+    var lt=rest.filter(function(L,i){return i!==usedIdx}).join("\n");
+    if(lt){
+      plats.forEach(function(p){lt=lt.split(p).join("")});
+      if(bmTxt)lt=lt.split(bmTxt).join("");
+      if(smTxt)lt=lt.split(smTxt).join("");
+      lt=lt.split(/\n/).map(function(s){return s.replace(/^[，,。;；、\s]+|[，,。;；、\s]+$/g,"")}).filter(function(s){return s}).join("\n");
+    }
+    return {f:f,leftover:lt};
+  }
+  document.getElementById("go-parse").addEventListener("click",function(){
+    var txt=document.getElementById("go-paste").value;
+    if(!txt.trim()){toast("先把项目信息粘贴到上面的框里");return}
+    var p=parseBrief(txt),filled=[];
+    [["projName","go-projName","项目名称"],["brand","go-brand","品牌/客户"],["platform","go-platform","投放平台"],["account","go-account","投放账号"],["budget","go-budget","预算/金额"],["schedule","go-schedule","排期/时间"],["req","go-req","需求说明"]].forEach(function(pr){
+      if(p.f[pr[0]]&&!document.getElementById(pr[1]).value.trim()){
+        document.getElementById(pr[1]).value=p.f[pr[0]];filled.push(pr[2]);
+      }
+    });
+    if(p.leftover){
+      var tgt=p.f.req?"go-free":"go-req";
+      if(!document.getElementById(tgt).value.trim()){
+        document.getElementById(tgt).value=p.leftover;filled.push(tgt==="go-free"?"补充信息":"需求说明");
+      }
+    }
+    gen();
+    toast(filled.length?("✓ 已识别填入 "+filled.length+" 项："+filled.join("、")):"没识别出能填的字段——带「项目名称：xxx」这类标签的文本识别率最高");
+  });
   gen();
 }
 
