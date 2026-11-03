@@ -1275,7 +1275,7 @@ function newsByProjectHTML(visNews){
   var projKeys=activeProjList.map(function(p){return p.name});
   var extraKeys=order.filter(function(k){return projKeys.indexOf(k)<0});
   var finalOrder=projKeys.concat(extraKeys);
-  if(!finalOrder.length)return '<div class="empty">暂无热点资讯（已完成项目已自动隐藏）</div>';
+  if(!finalOrder.length)return '<div class="empty">暂无「项目命中」热点（在项目里填抓取关键词，或点「导入抓取热点」刷新）</div>';
   var html='';
   finalOrder.forEach(function(pn){
     var items=byProj[pn]||[];
@@ -1311,7 +1311,7 @@ function newsModal(id){
   bindModal("nwc","nws",function(){
     var d=document.getElementById("nw-date").value.trim(),t=document.getElementById("nw-title").value.trim();
     if(!d||!t){toast("请填写日期和标题");return}
-    var data={date:d,source:document.getElementById("nw-source").value,title:t,summary:document.getElementById("nw-summary").value,project:document.getElementById("nw-project").value,link:document.getElementById("nw-link").value.trim()};
+    var data={date:d,source:document.getElementById("nw-source").value,title:t,summary:document.getElementById("nw-summary").value,project:document.getElementById("nw-project").value,link:document.getElementById("nw-link").value.trim(),cat:catOf(t)};
     if(n){Object.assign(n,data)}else{data.id=S.nid(S.news);S.news.push(data)}
     S.save();cmod();rn();
   });
@@ -1344,7 +1344,7 @@ function importHot(){
           author:it.author||"", authorLink:it.authorLink||"",
           like:it.like||0, collect:it.collect||0, comment:it.comment||0,
           share:it.share||0, interactive:it.interactive||0, fans:it.fans||0,
-          cat:it.cat||"she", heat:it.heat||0, rank:it.rank||0,
+          cat:it.cat||catOf(it.title), heat:it.heat||0, rank:it.rank||0,
           monitor:!!it.monitor, match:!!it.match, xhsLink:it.xhsLink||""
         });
         added++
