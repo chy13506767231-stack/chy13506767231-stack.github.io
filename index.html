@@ -170,7 +170,7 @@ textarea{resize:vertical;min-height:70px}
 .mb-12{margin-bottom:12px}
 .flex1{flex:1;min-width:0}
 .sh0{flex-shrink:0}
-.text-xs{font-size:11px;color:var(--t3)}
+.text-xs{font-size:11px;color:var(--muted)}
 .text-line{text-decoration:line-through;opacity:.4}
 .text-pre{white-space:pre-wrap}
 .fw-600{font-weight:600}
@@ -246,7 +246,7 @@ textarea{resize:vertical;min-height:70px}
 .news-tab{border:1px solid #9bb3d6;background:rgba(255,255,255,.4);color:#2c3340;padding:4px 13px;border-radius:18px;font-size:12px;cursor:pointer;font-family:inherit}
 .news-tab:hover{background:rgba(155,179,214,.25)}
 .news-tab.active{background:#4a7fd4;color:#fff;border-color:#4a7fd4}
-.news-summary{font-size:11px;color:#5a6675;margin:3px 0;line-height:1.5;max-height:46px;overflow:hidden;background:rgba(255,255,255,.4);padding:3px 7px;border-radius:6px;border-left:2px solid #9bb3d6}
+.news-summary{font-size:12.5px;color:#46535f;margin:3px 0;line-height:1.55;max-height:48px;overflow:hidden;background:rgba(255,255,255,.6);padding:4px 8px;border-radius:6px;border-left:2px solid #9bb3d6}
 .news-project:first-of-type{border-top:none}
 .news-proj-title{font-size:14px;margin:0 0 6px;display:flex;align-items:center;gap:8px}
 .news-proj-count{font-size:11px;color:var(--muted);font-weight:400}
@@ -260,6 +260,7 @@ textarea{resize:vertical;min-height:70px}
 .news-col{min-width:0}
 .news-col-hd{font-size:13px;font-weight:700;margin:2px 0 10px;padding:6px 10px;border-radius:8px;background:linear-gradient(90deg,#f6eafb,#eaf1fb);border-left:3px solid var(--pink)}
 .news-col .empty{margin-top:0}
+.news-col .news-card{background:#fff;border-radius:8px;padding:8px 10px;margin-bottom:8px;border-left:3px solid var(--pink)}
 /* 项目命中：双列网格 */
 .news-hit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .news-hit-grid .news-card{margin-bottom:0;background:#fff;border-radius:8px;padding:8px 10px}
@@ -1276,13 +1277,13 @@ function rn(){
 /* 单条热点卡片：分类徽章 + 平台 + 红狐/项目标记 + 热度 + 正文摘要 */
 function newsCardRow(n){
   var lk=newsLink(n)||n.xhsLink||n.link||"";
-  var catBadge=(n.cat==="wen")?'<span class="badge" style="background:#9b5de5;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🎬文娱</span> '
-              :(n.cat==="she")?'<span class="badge" style="background:#3a7bd5;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🌐社会</span> ':'';
-  var srcBadge='<span class="badge" style="background:#6b7785;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">'+esc(n.source||"")+'</span> ';
-  var rbadge=n.redfox?(n.type==="redfox_rank"?'<span class="badge" style="background:#c45b8a;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🏆红狐·赛道爆款</span> '
-              :'<span class="badge" style="background:#2f7d8c;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🔍红狐·精准</span> '):'';
-  var matchBadge=n.match?'<span class="badge" style="background:#d6336c;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">🎯项目</span> ':'';
-  var contentBadge=n.type==="content"?'<span class="badge" style="background:#7b8bab;color:#fff;font-size:10px;padding:0 6px;border-radius:4px">📄内容监测</span> ':'';
+  var catBadge=(n.cat==="wen")?'<span class="badge" style="background:#9b5de5;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">🎬文娱</span> '
+              :(n.cat==="she")?'<span class="badge" style="background:#3a7bd5;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">🌐社会</span> ':'';
+  var srcBadge='<span class="badge" style="background:#6b7785;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">'+esc(n.source||"")+'</span> ';
+  var rbadge=n.redfox?(n.type==="redfox_rank"?'<span class="badge" style="background:#c45b8a;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">🏆红狐·赛道爆款</span> '
+              :'<span class="badge" style="background:#2f7d8c;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">🔍红狐·精准</span> '):'';
+  var matchBadge=n.match?'<span class="badge" style="background:#d6336c;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">🎯项目</span> ':'';
+  var contentBadge=n.type==="content"?'<span class="badge" style="background:#7b8bab;color:#fff;font-size:11px;padding:1px 7px;border-radius:4px">📄内容监测</span> ':'';
   var heatEl='';
   if(n.heat||n.interactive){
     heatEl='<span class="text-xs" style="color:#e8590c">🔥'+fmtNum(n.heat||n.interactive)+(n.rank?(' · 第'+n.rank+'名'):'')+'</span> ';
@@ -1293,7 +1294,7 @@ function newsCardRow(n){
   var summary=n.summary?'<div class="news-summary">'+esc(n.summary)+'</div>':'';
   return '<div class="drag-item news-card" data-drag-id="'+n.id+'"><div class="row row-between"><div>'+catBadge+srcBadge+rbadge+matchBadge+contentBadge+'<span class="text-xs">'+esc(n.date||"")+'</span></div>'
     +'<div class="sh0"><button class="btn-ghost" data-nw-edit="'+n.id+'">编辑</button><button class="btn-ghost btn-ghost-danger" data-nw-del="'+n.id+'">✕</button></div></div>'
-    +'<div style="font-weight:600;font-size:12px;margin:4px 0">'+esc(n.title)+'</div>'
+    +'<div style="font-weight:600;font-size:13px;line-height:1.45;margin:4px 0">'+esc(n.title)+'</div>'
     +summary+stat+(heatEl?'<div style="margin-top:2px">'+heatEl+'</div>':'')
     +(lk?'<div class="news-link"><a href="'+esc(lk)+'" target="_blank" rel="noopener">🔗 查看原文</a></div>':'')
     +'</div>';
