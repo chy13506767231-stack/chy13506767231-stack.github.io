@@ -1042,7 +1042,10 @@ function rp(){
       S.projects=S.projects.filter(function(x){return x.name!==pname});
       /* 联动清理：项目删了，热点资讯里该项目名下的热点也一起删 */
       if(pname){S.news=S.news.filter(function(n){return n.project!==pname});}
+      /* 联动清理：项目删了，对应的项目文档夹也一并删除（保持同步） */
+      if(pname){var pd=S.projdocs.find(function(x){return x.project===pname}); if(pd){tombstone("projdocs",pd.id);S.projdocs=S.projdocs.filter(function(x){return x.id!==pd.id});}}
       S.save();renderHeader();rp();
+      if(ct==="projdocs")rpd();
       if(ct==="news")rn(); /* 若正在看热点资讯，立即刷新 */
     });
   });
@@ -1063,9 +1066,19 @@ function projModal(id){
   bindModal("pjc","pjs",function(){
     var n=document.getElementById("pj-name").value.trim();
     if(!n){toast("请输入项目名称");return}
+    var oldName=p?p.name:null;
     var data={name:n,client:document.getElementById("pj-client").value,amount:document.getElementById("pj-amount").value,kpi:document.getElementById("pj-kpi").value,stage:+document.getElementById("pj-stage").value,status:document.getElementById("pj-status").value,result:document.getElementById("pj-result").value.trim(),execTime:document.getElementById("pj-exectime").value.trim(),hotKw:document.getElementById("pj-hotkw").value.trim()};
-    if(p){Object.assign(p,data)}else{data.id=S.nid(S.projects);data.createdAt=Date.now();S.projects.push(data)}
+    if(p){
+      Object.assign(p,data);
+      /* 项目改名 → 同步重命名对应的项目文档夹 */
+      if(oldName&&oldName!==n){var pd=S.projdocs.find(function(x){return x.project===oldName}); if(pd)pd.project=n; else ensureProjDoc(n);}
+    }else{
+      data.id=S.nid(S.projects);data.createdAt=Date.now();S.projects.push(data);
+      ensureProjDoc(n); /* 新建项目 → 自动同步一个项目文档夹（含 BF/策划/执行/数据回收 4 个板块）*/
+    }
     S.save();cmod();renderHeader();rp();
+    if(ct==="projdocs")rpd();
+    if(!p)toast("已自动创建「"+n+"」项目文档夹（含 BF/策划/执行/数据回收 板块，链接待你填写）");
   });
 }
 
@@ -1085,12 +1098,15 @@ function syncAllProjDocs(){
 }
 function rpd(){
   var ds=orderItems(S.projdocs.slice().sort(function(a,b){return projRank(a.project)-projRank(b.project)}),"projdocs",function(pj){return pj.id});
-  var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-pd-btn">+ 新建项目文档夹</button></div>';
+  var html='<div class="row mb-12" style="gap:8px"><button class="btn btn-primary btn-sm" id="add-pd-btn">+ 新建项目文档夹</button><button class="btn btn-sm" id="sync-pd-btn" title="为「项目进度」里所有项目补齐文档夹（含 BF/策划/执行/数据回收 4 个板块）">🔄 同步全部</button></div>';
   html+=ds.length?ds.map(function(pj){
     return '<div class="drag-item card" data-drag-id="'+pj.id+'"><div class="row row-between mb-8"><div class="fw-700" style="font-size:13px">'+esc(pj.project)+'</div>'
       +'<div class="sh0"><button class="btn btn-sm btn-primary" data-pd-add="'+pj.id+'">+ 文档</button> <button class="btn btn-sm btn-ghost" data-pd-edit="'+pj.id+'">编辑</button> <button class="btn btn-sm btn-ghost btn-ghost-danger" data-pd-del="'+pj.id+'">✕</button></div></div>'
       +((pj.docs||[]).length?(pj.docs||[]).map(function(d,di){
-        return '<div class="doc-row"><span style="min-width:80px;font-size:12px;font-weight:600">'+esc(d.name)+'</span><a href="'+esc(d.link)+'" target="_blank">'+esc(d.link)+'</a><button class="btn-ghost sh0" data-doc-edit="'+pj.id+':'+di+'">编辑</button><button class="btn-ghost btn-ghost-danger sh0" data-doc-del="'+pj.id+':'+di+'">✕</button></div>';
+        var hl=(d.link||"").trim();
+        var lh=hl?'<a href="'+esc(hl)+'" target="_blank" rel="noopener">'+esc(hl)+'</a>':'<span class="text-xs" style="color:var(--muted)">待填写链接 · 点「编辑」添加</span>';
+        var tag=PD_SECTIONS.indexOf(d.name)>=0?' <span class="badge badge-gray" style="font-size:10px;padding:0 5px">预置板块</span>':'';
+        return '<div class="doc-row"><span style="min-width:84px;font-size:12px;font-weight:600">'+esc(d.name)+tag+'</span>'+lh+'<button class="btn-ghost sh0" data-doc-edit="'+pj.id+':'+di+'">编辑</button>'+(hl?'<button class="btn-ghost btn-ghost-danger sh0" data-doc-del="'+pj.id+':'+di+'">✕</button>':'')+'</div>';
       }).join(""):'<div class="text-xs">暂无文档</div>')
       +'</div>';
   }).join(""):'<div class="empty">暂无项目文档</div>';
@@ -1104,6 +1120,12 @@ function rpd(){
       if(!p){toast("请填写项目名称");return}
       S.projdocs.push({id:S.nid(S.projdocs),project:p,docs:[]});S.save();cmod();rpd();
     });
+  });
+  var syncBtn=document.getElementById("sync-pd-btn");
+  if(syncBtn)syncBtn.addEventListener("click",function(){
+    var added=syncAllProjDocs();
+    S.save();rpd();
+    toast(added>0?("已为 "+added+" 个项目补齐文档夹（含 4 个板块）"):"所有项目均已同步文档夹");
   });
   document.querySelectorAll("[data-pd-add]").forEach(function(b){
     b.addEventListener("click",function(){
