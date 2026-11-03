@@ -1170,12 +1170,12 @@ function rn(){
     +'<div id="monitor-result" class="monitor-result"></div></section>'
     +'<div class="row mb-12"><button class="btn btn-pink btn-sm" id="add-news-btn">+ 添加热点</button>'
     +'<button class="btn btn-sm" id="import-hot-btn">导入抓取热点</button></div>';
-  /* 文娱 / 社会 / 项目命中 / 全部 分类 tab */
+  /* 通用 / 文娱 / 社会 / 项目命中 分类 tab（通用+文娱/社会为通用板块；项目命中仅项目命中） */
   html+='<div class="news-tabs">'
+    +'<button class="news-tab'+(NW_TAB==="general"?" active":"")+'" data-nw-tab="general">📡 通用</button>'
     +'<button class="news-tab'+(NW_TAB==="wen"?" active":"")+'" data-nw-tab="wen">🎬 文娱</button>'
     +'<button class="news-tab'+(NW_TAB==="she"?" active":"")+'" data-nw-tab="she">🌐 社会</button>'
     +'<button class="news-tab'+(NW_TAB==="proj"?" active":"")+'" data-nw-tab="proj">🎯 项目命中</button>'
-    +'<button class="news-tab'+(NW_TAB==="all"?" active":"")+'" data-nw-tab="all">全部</button>'
     +'</div>';
 
   var doneProjs=S.projects.filter(function(p){return p.status==="已完成"}).map(function(p){return p.name});
@@ -1189,12 +1189,13 @@ function rn(){
   visNews=orderItems(visNews,"news",function(n){return n.id});
 
   if(NW_TAB==="proj"){
-    html+=newsByProjectHTML(visNews);
+    /* 项目命中：只显示「项目关键词命中」的条目（match===true），不再混入通用热点 */
+    html+=newsByProjectHTML(visNews.filter(function(n){return n.match}));
   } else {
     var list=visNews.filter(function(n){
-      if(NW_TAB==="all")return true;
-      if(NW_TAB==="wen")return (n.cat||"she")==="wen";
-      if(NW_TAB==="she")return (n.cat||"she")==="she";
+      if(NW_TAB==="general")return !n.match;                         /* 通用：所有非项目命中（平台监测+手动） */
+      if(NW_TAB==="wen")return !n.match && (n.cat||"she")==="wen";   /* 文娱：通用里归类为文娱的 */
+      if(NW_TAB==="she")return !n.match && (n.cat||"she")==="she";   /* 社会：通用里归类为社会 */
       return true;
     });
     html+=newsCardsHTML(list);
@@ -1267,7 +1268,7 @@ function newsCardsHTML(list){
 }
 /* 项目命中视图：按项目→平台分组（仅在「项目命中」tab 用） */
 function newsByProjectHTML(visNews){
-  if(!visNews.length)return '<div class="empty">暂无热点资讯（已完成项目已自动隐藏）</div>';
+  if(!visNews.length)return '<div class="empty">暂无「项目命中」热点（在项目里填抓取关键词，或点「导入抓取热点」刷新；已完成项目已自动隐藏）</div>';
   var activeProjList=canonProjs().filter(function(p){return p.status!=="已完成"}).map(function(p){return {name:p.name,stage:p.stage||0}});
   var byProj={},order=[];
   visNews.forEach(function(n){var key=n.project||"通用热点";if(!byProj[key]){byProj[key]=[];order.push(key);}byProj[key].push(n);});
