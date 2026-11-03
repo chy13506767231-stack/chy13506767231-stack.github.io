@@ -1070,6 +1070,19 @@ function projModal(id){
 }
 
 /* ================= 4. 项目文档管理 ================= */
+/* 项目文档夹自动同步：每个项目对应一个文档夹，预置 4 个固定板块（链接由用户后续填写） */
+var PD_SECTIONS=["BF文档","策划文档","执行文档","数据回收"];
+function ensureProjDoc(projName){
+  if(!projName)return false;
+  if(S.projdocs.some(function(x){return x.project===projName}))return false;
+  S.projdocs.push({id:S.nid(S.projdocs),project:projName,docs:PD_SECTIONS.map(function(s){return {name:s,link:""}})});
+  return true;
+}
+function syncAllProjDocs(){
+  var added=0;
+  S.projects.forEach(function(p){ if(ensureProjDoc(p.name))added++; });
+  return added;
+}
 function rpd(){
   var ds=orderItems(S.projdocs.slice().sort(function(a,b){return projRank(a.project)-projRank(b.project)}),"projdocs",function(pj){return pj.id});
   var html='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-pd-btn">+ 新建项目文档夹</button></div>';
