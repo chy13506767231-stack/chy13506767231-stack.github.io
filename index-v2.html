@@ -1517,7 +1517,7 @@ function rtp(){
   var ftd=tcat==="all"?S.templates:S.templates.filter(function(t){return t.cat===tcat});
   var html='<div class="cat-pills"><span class="cat-pill'+(tcat==="all"?" active":"")+'" data-tcat="all">全部('+S.templates.length+')</span>'
     +Object.keys(cats).map(function(c){return '<span class="cat-pill'+(tcat===c?" active":"")+'" data-tcat="'+esc(c)+'">'+esc(c)+'('+cats[c]+')</span>'}).join("")+'</div>';
-  html+='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-tp-btn">+ 新建模板</button></div>';
+  html+='<div class="row mb-12"><button class="btn btn-primary btn-sm" id="add-tp-btn">+ 新建模板</button><button class="btn btn-sm" id="gen-order-btn" style="margin-left:6px">🪄 智能生成</button></div>';
   html+=ftd.length?'<div class="tpl-grid">'+orderItems(ftd,"templates",function(t){return t.id}).map(function(t){
     return '<div class="drag-item tpl-card" data-drag-id="'+t.id+'"><div class="tpl-card-hd"><div><div class="fw-600">'+esc(t.name)+'</div><div class="tpl-dept">'+esc(t.dept||"")+'</div></div>'
       +'<span class="badge badge-'+(t.cat==="MCN"?"blue":t.cat==="投流"?"pink":t.cat==="策划"?"green":"gray")+'">'+esc(t.cat)+'</span></div>'
