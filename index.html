@@ -2277,10 +2277,18 @@ function tombstone(storeKey, mergeKeyValue){
   var list=S.deleted[storeKey]||(S.deleted[storeKey]=[]);
   if(list.indexOf(mergeKeyValue)<0) list.push(mergeKeyValue);
 }
-/* 按墓碑过滤数组：去掉所有被标记为已删除的条目 */
+/* 按墓碑过滤数组：去掉所有被标记为已删除的条目。
+   对 projdocs 额外支持「文档行级」墓碑：键格式 "<project>::<docName>"，
+   用于在线/手机版删除某条预置板块时，刷新后也不会被云端整文件夹合并复活。 */
 function applyTombs(k, arr){
   var tombs=(S.deleted||{})[k];
   if(!tombs||!tombs.length) return arr;
+  if(k==="projdocs"){
+    arr=arr.map(function(pj){
+      var docs=(pj.docs||[]).filter(function(d){ return tombs.indexOf(pj.project+"::"+d.name)<0; });
+      return Object.assign({},pj,{docs:docs});
+    });
+  }
   return arr.filter(function(x){ return tombs.indexOf(mergeKey(k,x))<0; });
 }
 function mergeLWW(remote){
