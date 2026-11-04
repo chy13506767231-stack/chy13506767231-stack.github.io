@@ -1328,7 +1328,8 @@ function rpd(){
   document.querySelectorAll("[data-pd-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该文档夹及其中所有文档？"))return;
-      tombstone("projdocs", +b.dataset.pdDel);
+      var fpj=S.projdocs.find(function(x){return x.id===+b.dataset.pdDel});
+      if(fpj)tombstone("projdocs", fpj.project); /* 用 mergeKey(项目名) 记墓碑，applyTombs 才能真正过滤掉 */
       S.projdocs=S.projdocs.filter(function(x){return x.id!==+b.dataset.pdDel});S.save();rpd();
     });
   });
@@ -1355,6 +1356,7 @@ function rpd(){
       if(!pj||!pj.docs||!pj.docs[+parts[1]])return;
       if(!confirm("确定删除该文档行？"))return;
       var nm=pj.docs[+parts[1]].name;
+      tombstone("projdocs",pj.project+"::"+nm); /* 文档行级墓碑：在线/手机版删除也能跨刷新持久（云端整夹合并也不会复活该行） */
       pj.docs.splice(+parts[1],1);
       if(PD_SECTIONS.indexOf(nm)>=0){pj.skip=pj.skip||[];if(pj.skip.indexOf(nm)<0)pj.skip.push(nm);} /* 预置板块删除后不再自动回填 */
       S.save();rpd();
