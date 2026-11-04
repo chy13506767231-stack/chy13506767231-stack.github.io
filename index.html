@@ -1225,15 +1225,18 @@ var PD_SECTIONS=["BF文档","策划文档","执行文档","数据回收"];
 function backfillSections(pj){
   var changed=false;
   pj.docs=pj.docs||[];pj.skip=pj.skip||[];
+  var tombs=(S.deleted&&S.deleted.projdocs)||[];
   PD_SECTIONS.forEach(function(s){
     if(pj.skip.indexOf(s)>=0)return; /* 用户手动删过 → 不再自动补 */
+    if(tombs.indexOf(pj.project+"::"+s)>=0)return; /* 墓碑屏蔽的预置板块也不补 */
     if(!pj.docs.some(function(d){return d.name===s})){ pj.docs.push({name:s,link:""}); changed=true; }
   });
   return changed;
 }
-function pdUnskip(pj,name){ /* 手动加回同名板块 → 解除删除记忆 */
-  if(!pj||!pj.skip)return;
-  var i=pj.skip.indexOf(name);if(i>=0)pj.skip.splice(i,1);
+function pdUnskip(pj,name){ /* 手动加回同名板块 → 解除删除记忆 + 清掉墓碑 */
+  if(!pj)return;
+  if(pj.skip){var i=pj.skip.indexOf(name);if(i>=0)pj.skip.splice(i,1);}
+  if(S.deleted&&S.deleted.projdocs){var j=S.deleted.projdocs.indexOf(pj.project+"::"+name);if(j>=0)S.deleted.projdocs.splice(j,1);}
 }
 function ensureProjDoc(projName){
   if(!projName)return false;
