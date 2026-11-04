@@ -1307,7 +1307,7 @@ function rpd(){
         var l=document.getElementById("pd-link").value.trim(),n=document.getElementById("pd-name").value.trim()||"未命名文档";
         if(!l){toast("请填写链接");return}
         var pj=S.projdocs.find(function(x){return x.id===pid});
-        if(pj){pj.docs=pj.docs||[];pj.docs.push({name:n,link:l});S.save()}
+        if(pj){pj.docs=pj.docs||[];pj.docs.push({name:n,link:l});pdUnskip(pj,n);S.save()}
         cmod();rpd();
       });
     });
@@ -1345,14 +1345,19 @@ function rpd(){
       bindModal("edc","eds",function(){
         var l=document.getElementById("ed-link").value.trim(),n=document.getElementById("ed-name").value.trim()||"未命名文档";
         if(!l){toast("请填写链接");return}
-        d.name=n;d.link=l;S.save();cmod();rpd();
+        d.name=n;d.link=l;var pdp=S.projdocs.find(function(x){return x.id===pj.id});pdUnskip(pdp,n);S.save();cmod();rpd();
       });
     });
   });
   document.querySelectorAll("[data-doc-del]").forEach(function(b){
     b.addEventListener("click",function(){
       var parts=b.dataset.docDel.split(":"),pj=S.projdocs.find(function(x){return x.id===+parts[0]});
-      if(pj&&pj.docs){pj.docs.splice(+parts[1],1);S.save();rpd()}
+      if(!pj||!pj.docs||!pj.docs[+parts[1]])return;
+      if(!confirm("确定删除该文档行？"))return;
+      var nm=pj.docs[+parts[1]].name;
+      pj.docs.splice(+parts[1],1);
+      if(PD_SECTIONS.indexOf(nm)>=0){pj.skip=pj.skip||[];if(pj.skip.indexOf(nm)<0)pj.skip.push(nm);} /* 预置板块删除后不再自动回填 */
+      S.save();rpd();
     });
   });
 }
