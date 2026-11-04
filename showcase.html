@@ -1225,15 +1225,18 @@ var PD_SECTIONS=["BF文档","策划文档","执行文档","数据回收"];
 function backfillSections(pj){
   var changed=false;
   pj.docs=pj.docs||[];pj.skip=pj.skip||[];
+  var tombs=(S.deleted&&S.deleted.projdocs)||[];
   PD_SECTIONS.forEach(function(s){
     if(pj.skip.indexOf(s)>=0)return; /* 用户手动删过 → 不再自动补 */
+    if(tombs.indexOf(pj.project+"::"+s)>=0)return; /* 墓碑屏蔽的预置板块也不补 */
     if(!pj.docs.some(function(d){return d.name===s})){ pj.docs.push({name:s,link:""}); changed=true; }
   });
   return changed;
 }
-function pdUnskip(pj,name){ /* 手动加回同名板块 → 解除删除记忆 */
-  if(!pj||!pj.skip)return;
-  var i=pj.skip.indexOf(name);if(i>=0)pj.skip.splice(i,1);
+function pdUnskip(pj,name){ /* 手动加回同名板块 → 解除删除记忆 + 清掉墓碑 */
+  if(!pj)return;
+  if(pj.skip){var i=pj.skip.indexOf(name);if(i>=0)pj.skip.splice(i,1);}
+  if(S.deleted&&S.deleted.projdocs){var j=S.deleted.projdocs.indexOf(pj.project+"::"+name);if(j>=0)S.deleted.projdocs.splice(j,1);}
 }
 function ensureProjDoc(projName){
   if(!projName)return false;
@@ -1328,7 +1331,8 @@ function rpd(){
   document.querySelectorAll("[data-pd-del]").forEach(function(b){
     b.addEventListener("click",function(){
       if(!confirm("确定删除该文档夹及其中所有文档？"))return;
-      tombstone("projdocs", +b.dataset.pdDel);
+      var fpj=S.projdocs.find(function(x){return x.id===+b.dataset.pdDel});
+      if(fpj)tombstone("projdocs", fpj.project); /* 用 mergeKey(项目名) 记墓碑，applyTombs 才能真正过滤掉 */
       S.projdocs=S.projdocs.filter(function(x){return x.id!==+b.dataset.pdDel});S.save();rpd();
     });
   });
@@ -1355,6 +1359,7 @@ function rpd(){
       if(!pj||!pj.docs||!pj.docs[+parts[1]])return;
       if(!confirm("确定删除该文档行？"))return;
       var nm=pj.docs[+parts[1]].name;
+      tombstone("projdocs",pj.project+"::"+nm); /* 文档行级墓碑：在线/手机版删除也能跨刷新持久（云端整夹合并也不会复活该行） */
       pj.docs.splice(+parts[1],1);
       if(PD_SECTIONS.indexOf(nm)>=0){pj.skip=pj.skip||[];if(pj.skip.indexOf(nm)<0)pj.skip.push(nm);} /* 预置板块删除后不再自动回填 */
       S.save();rpd();
@@ -2277,10 +2282,18 @@ function tombstone(storeKey, mergeKeyValue){
   var list=S.deleted[storeKey]||(S.deleted[storeKey]=[]);
   if(list.indexOf(mergeKeyValue)<0) list.push(mergeKeyValue);
 }
-/* 按墓碑过滤数组：去掉所有被标记为已删除的条目 */
+/* 按墓碑过滤数组：去掉所有被标记为已删除的条目。
+   对 projdocs 额外支持「文档行级」墓碑：键格式 "<project>::<docName>"，
+   用于在线/手机版删除某条预置板块时，刷新后也不会被云端整文件夹合并复活。 */
 function applyTombs(k, arr){
   var tombs=(S.deleted||{})[k];
   if(!tombs||!tombs.length) return arr;
+  if(k==="projdocs"){
+    arr=arr.map(function(pj){
+      var docs=(pj.docs||[]).filter(function(d){ return tombs.indexOf(pj.project+"::"+d.name)<0; });
+      return Object.assign({},pj,{docs:docs});
+    });
+  }
   return arr.filter(function(x){ return tombs.indexOf(mergeKey(k,x))<0; });
 }
 function mergeLWW(remote){
