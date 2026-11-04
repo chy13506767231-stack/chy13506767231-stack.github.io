@@ -1221,16 +1221,43 @@ function projModal(id){
 /* ================= 4. 项目文档管理 ================= */
 /* 项目文档夹自动同步：每个项目对应一个文档夹，预置 4 个固定板块（链接由用户后续填写） */
 var PD_SECTIONS=["BF文档","策划文档","执行文档","数据回收"];
+/* 缺哪块补哪块：老文件夹（预置功能上线前创建的）也能补齐 4 个预置板块，不动用户自建文档 */
+function backfillSections(pj){
+  var changed=false;
+  pj.docs=pj.docs||[];
+  PD_SECTIONS.forEach(function(s){
+    if(!pj.docs.some(function(d){return d.name===s})){ pj.docs.push({name:s,link:""}); changed=true; }
+  });
+  return changed;
+}
 function ensureProjDoc(projName){
   if(!projName)return false;
-  if(S.projdocs.some(function(x){return x.project===projName}))return false;
-  S.projdocs.push({id:S.nid(S.projdocs),project:projName,docs:PD_SECTIONS.map(function(s){return {name:s,link:""}})});
-  return true;
+  var pj=S.projdocs.find(function(x){return x.project===projName});
+  if(!pj){
+    S.projdocs.push({id:S.nid(S.projdocs),project:projName,docs:PD_SECTIONS.map(function(s){return {name:s,link:""}})});
+    return true;
+  }
+  return backfillSections(pj); /* 文件夹已在 → 补齐缺失的预置板块 */
 }
 function syncAllProjDocs(){
-  var added=0;
-  S.projects.forEach(function(p){ if(ensureProjDoc(p.name))added++; });
-  return added;
+  var touched=0;
+  S.projects.forEach(function(p){
+    var pj=S.projdocs.find(function(x){return x.project===p.name});
+    if(!pj){ if(ensureProjDoc(p.name))touched++; }
+    else if(backfillSections(pj))touched++;
+  });
+  return touched;
+}
+/* 打开工作台时自动回填：只处理进行中项目的文件夹（已完结项目不塞空板块） */
+function backfillActiveSections(){
+  var changed=false;
+  S.projects.forEach(function(p){
+    if(projDone(p))return;
+    var pj=S.projdocs.find(function(x){return x.project===p.name});
+    if(pj&&backfillSections(pj))changed=true;
+  });
+  if(changed){S.save();toast("已为进行中项目补齐预置板块（BF/策划/执行/数据回收）");}
+  return changed;
 }
 function rpd(){
   var ds=orderItems(S.projdocs.slice().sort(function(a,b){return projRank(a.project)-projRank(b.project)}),"projdocs",function(pj){return pj.id});
@@ -2375,6 +2402,7 @@ if(location.protocol!=="file:"){
     }
     /* 无论云端有没有数据，都把本机（含合并结果）推上去，保证云端不留旧版本 */
     S.save(true);
+    backfillActiveSections(); /* 自愈3：打开工作台时给进行中项目的文件夹补齐缺失的预置板块 */
     cloudPut(cloudObj(),function(ok){setSyncPill(ok?"☁️ 已同步云端":"📴 离线·本机")});
     boot();
     startSync(); /* 安全自动合并：每 30 秒用 mergeRemote 拉云端，不会吃本地新增（区别于原覆盖式拉取） */
@@ -2393,6 +2421,7 @@ if(location.protocol!=="file:"){
     ["百度文库-博物馆","百度文库-小爆款"].forEach(function(n){ if(dp.indexOf(n)<0) dp.push(n); });
     if(cleaned){ DB.s("projects",S.projects); DB.s("deleted",S.deleted); }
   })();
+  backfillActiveSections(); /* file:// 模式同样补齐进行中项目的预置板块 */
   boot(); /* file:// 直接打开：纯本机模式 */
 }
 
