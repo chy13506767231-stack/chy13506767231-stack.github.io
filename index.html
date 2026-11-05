@@ -1090,11 +1090,11 @@ function startReminder(){
 function projRowHtml(p,withActions){
   var done=p.stagesDone||[];if(!done.length&&p.stage)for(var i=1;i<=p.stage;i++)done.push(i);
   var cur=done.length?Math.max.apply(null,done):0;
-  var segs="";for(var i=1;i<=8;i++){segs+='<div class="stage-seg'+(done.indexOf(i)>=0?" on":"")+'" title="'+i+' - '+SN[i-1]+'"></div>'}
+  var segs="";for(var i=1;i<=SN_LAST;i++){segs+='<div class="stage-seg'+(done.indexOf(i)>=0?" on":"")+'" title="'+i+' - '+SN[i-1]+'"></div>'}
   var html='<div style="padding:10px 0;border-bottom:1px solid #f0eeec">'
     +'<div class="row row-between"><div class="flex1"><div class="fw-600">'+esc(p.name)+'</div>'
     +'<div class="text-xs">'+esc(p.client||"-")+' | '+esc(kpiText(p)||"-")+' | '+esc(p.amount||"-")+(p.execTime?' | <span title="执行时间">⏱ '+esc(p.execTime)+'</span>':'')+'</div></div>'
-    +'<div class="sh0"><span class="badge badge-green">'+(cur>0?cur+" - "+SN[cur-1]:"未开始")+'</span> <span class="badge badge-gray">☑ '+done.length+'/8</span>'
+    +'<div class="sh0"><span class="badge badge-green">'+(cur>0?cur+" - "+SN[cur-1]:"未开始")+'</span> <span class="badge badge-gray">☑ '+done.length+'/'+SN_LAST+'</span>'
     +(projDone(p)?' <span class="badge badge-green">✅ 已完结</span>':'')
     +(p.hotKw?' <span class="badge badge-blue" title="热点抓取关键词">🔍 '+esc(p.hotKw)+'</span>':'');
   if(withActions){html+=' <button class="btn btn-sm" data-pj-edit="'+p.id+'">编辑</button> <button class="btn btn-sm btn-ghost btn-ghost-danger" data-pj-del="'+p.id+'">✕</button>'}
@@ -1103,13 +1103,14 @@ function projRowHtml(p,withActions){
     : '<div class="result-box result-box-empty" style="margin-top:8px"><button class="btn btn-sm btn-ghost" data-pj-result="'+p.id+'">+ 添加达成成果</button></div>';
   /* 进行中项目：阶段 TODO 直接外显在卡片上（可打勾）；已完结项目收回去，只留进度条 */
   var todoExt=projDone(p)?"":'<div class="pj-todo" style="margin-top:8px">'
-    +[1,2,3,4,5,6,7,8].map(function(i){
-      return '<label class="pj-todo-item"><input type="checkbox" class="pj-stage-ext" data-pid="'+p.id+'" value="'+i+'"'+(done.indexOf(i)>=0?" checked":"")+'><span>'+i+' - '+SN[i-1]+(i===8?" ✅":"")+'</span></label>';
+    +SN.map(function(_,k){
+      var i=k+1;
+      return '<label class="pj-todo-item"><input type="checkbox" class="pj-stage-ext" data-pid="'+p.id+'" value="'+i+'"'+(done.indexOf(i)>=0?" checked":"")+'><span>'+i+' - '+SN[k]+(i===SN_LAST?" ✅":"")+'</span></label>';
     }).join("")+'</div>';
   html+='</div></div><div class="stage-bar">'+segs+'</div>'+todoExt+resultBlock+'</div>';
   return html;
 }
-/* 卡片外显 TODO（首页概览 + 项目进度页通用）：直接打勾/取消勾选，实时保存；勾满 8 步自动完结并收回清单 */
+/* 卡片外显 TODO（首页概览 + 项目进度页通用）：直接打勾/取消勾选，实时保存；勾满全部步骤自动完结并收回清单 */
 document.addEventListener("change",function(e){
   var c=e.target;
   if(!c.classList||!c.classList.contains("pj-stage-ext"))return;
@@ -1119,7 +1120,7 @@ document.addEventListener("change",function(e){
   if(c.checked){if(d.indexOf(v)<0)d.push(v)}else{d=d.filter(function(x){return x!==v})}
   d.sort(function(a,b){return a-b});
   pr.stagesDone=d;pr.stage=d.length?Math.max.apply(null,d):1;
-  pr.status=d.indexOf(8)>=0?"已完成":"进行中";
+  pr.status=d.indexOf(SN_LAST)>=0?"已完成":"进行中";
   S.save();
   if(pr.status==="已完成")toast("🎉 项目已完结，阶段清单已收回");
   ro();rp();if(ct==="projdocs")rpd();
