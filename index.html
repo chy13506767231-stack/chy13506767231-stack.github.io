@@ -493,9 +493,10 @@ var DB={
   g:function(k,d){try{var v=localStorage.getItem(this.k(k));return v?JSON.parse(v):d}catch(e){return d}},
   s:function(k,v){localStorage.setItem(this.k(k),JSON.stringify(v))}
 };
-var SN=["策划","脚本","视频","发布","录入ERP","数据回收","录入CRM","完结"];
-/* 项目完成判断（统一入口）：新数据看第 8 步「完结」是否打勾；旧数据兼容 status==="已完成" */
-function projDone(p){ if(!p)return false; if((p.stagesDone||[]).indexOf(8)>=0)return true; return p.status==="已完成"; }
+var SN=["策划","ERP预录入","脚本","视频","发布","ERP补录链接","数据回收","录入CRM","完结"];
+var SN_LAST=SN.length; /* 最后一步=完结（步骤数变化时自动适配） */
+/* 项目完成判断（统一入口）：新数据看最后一步「完结」是否打勾；旧数据兼容 status==="已完成" */
+function projDone(p){ if(!p)return false; if((p.stagesDone||[]).indexOf(SN_LAST)>=0)return true; return p.status==="已完成"; }
 /* KPI 摘要（卡片上显示）：兼容旧 kpi 自由文本与新 kpiObj 结构 */
 function kpiText(p){
   if(p.kpiObj&&(p.kpiObj.cpm||p.kpiObj.rankOn||p.kpiObj.other)){
