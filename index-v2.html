@@ -1855,8 +1855,8 @@ function genOrderModal(){
     while((m=re1.exec(raw))){
       var label=m[1].replace(/[\s\/／+]/g,""),val=(m[2]||"").trim();
       if(!val)continue;
-      if(/^(项目名称|项目名|项目)$/.test(label))put("go-projName",val);
-      else if(/^(项目品牌名|品牌名|品牌|客户|甲方|商务)$/.test(label))put("go-brand",val);
+      if(/^(项目名称|项目名|项目|项目品牌名)$/.test(label))put("go-projName",val);
+      else if(/^(品牌名|品牌|客户|甲方)$/.test(label))put("go-brand",val);
       else if(/^(投放平台|平台|发布平台|渠道)$/.test(label))put("go-platform",val);
       else if(/^(投放账号|账号|达人账号|账号数量)$/.test(label))put("go-account",val);
       else if(/^(预算|金额|费用|报价|项目金额|投流预算)$/.test(label))put("go-budget",val);
