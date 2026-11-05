@@ -1760,7 +1760,7 @@ function genOrderModal(){
     +'<label class="go-chk"><input type="checkbox" id="go-append"'+(d.append?" checked":"")+'> 末尾始终附带完整项目信息摘要</label>'
     +'</div>'
     +'<div class="go-preview"><div class="go-preview-hd">生成结果（一键复制）</div><textarea id="go-out" rows="16" readonly></textarea>'
-    +'<div class="row row-end gap-4 mt-8"><button class="btn" id="go-close">关闭</button><button class="btn btn-primary" id="go-copy">📋 复制结果</button></div></div>'
+    +'<div class="row row-end gap-4 mt-8"><button class="btn" id="go-close">关闭</button><button class="btn" id="go-clear">🗑 清空</button><button class="btn btn-primary" id="go-copy">📋 复制结果</button></div></div>'
     +'</div>');
   var md=document.querySelector(".modal"); if(md)md.classList.add("modal-wide");
 
@@ -1833,6 +1833,72 @@ function genOrderModal(){
   document.getElementById("go-append").addEventListener("change",gen);
   document.getElementById("go-close").addEventListener("click",cmod);
   document.getElementById("go-copy").addEventListener("click",function(){copyText(document.getElementById("go-out").value)});
+  /* 🗑 清空：清掉所有已填字段 + 草稿 + 生成结果，可重新开始 */
+  document.getElementById("go-clear").addEventListener("click",function(){
+    if(!confirm("清空所有已填信息、识别内容与生成结果？"))return;
+    S.manual.orderDraft={};DB.s("manual",S.manual);
+    ["go-projName","go-brand","go-platform","go-account","go-budget","go-schedule","go-req","go-free","go-paste","go-out"].forEach(function(id){document.getElementById(id).value=""});
+    document.getElementById("go-tpl").value="";
+    document.getElementById("go-append").checked=false;
+    toast("已清空，可重新填写");
+  });
+  /* 🔍 一键识别：整段粘贴 → 解析标签/自由文本 → 只填空字段，不覆盖手填内容 */
+  function parseBrief(){
+    var raw=document.getElementById("go-paste").value.trim();
+    if(!raw){toast("请先粘贴项目信息");return}
+    var set=function(id,v){var el=document.getElementById(id);if(v&&el&&!el.value.trim()){el.value=v;return true}return false};
+    var hit=[];
+    var put=function(key,v){ if(!v)return; if(set(key,v))hit.push(elName(key)); };
+    function elName(id){return {goProjName:"项目名称","go-projName":"项目名称","go-brand":"品牌/客户","go-platform":"投放平台","go-account":"投放账号","go-budget":"预算/金额","go-schedule":"排期/时间","go-req":"需求说明"}[id]||id}
+    /* 1)【标签】值 形式 */
+    var re1=/【([^】]+)】\s*([^【\n]*)/g,m;
+    while((m=re1.exec(raw))){
+      var label=m[1].replace(/[\s\/／+]/g,""),val=(m[2]||"").trim();
+      if(!val)continue;
+      if(/^(项目名称|项目名|项目|项目品牌名)$/.test(label))put("go-projName",val);
+      else if(/^(品牌名|品牌|客户|甲方)$/.test(label))put("go-brand",val);
+      else if(/^(投放平台|平台|发布平台|渠道)$/.test(label))put("go-platform",val);
+      else if(/^(投放账号|账号|达人账号|账号数量)$/.test(label))put("go-account",val);
+      else if(/^(预算|金额|费用|报价|项目金额|投流预算)$/.test(label))put("go-budget",val);
+      else if(/^(排期|档期|时间|发布时间|执行时间|上线时间|执行日期)$/.test(label))put("go-schedule",val);
+      else if(/^(需求|诉求|需求说明|商单诉求|项目需求|内容方向|话题词方向|话题词|要求|KPI|指令)$/.test(label))put("go-req",val);
+    }
+    /* 2)「标签：值」行形式 */
+    var re2=/^(项目名称|项目名|项目|品牌名|品牌|客户|甲方|投放平台|平台|发布平台|渠道|投放账号|账号|达人账号|预算|金额|费用|报价|排期|档期|时间|发布时间|执行时间|上线时间|执行日期|需求|诉求|需求说明|商单诉求|内容方向|要求|KPI)\s*[:：]\s*(.+)$/gm;
+    while((m=re2.exec(raw))){
+      var lb=m[1],v2=m[2].trim();
+      if(/^(项目名称|项目名|项目)$/.test(lb))put("go-projName",v2);
+      else if(/^(品牌名|品牌|客户|甲方)$/.test(lb))put("go-brand",v2);
+      else if(/^(投放平台|平台|发布平台|渠道)$/.test(lb))put("go-platform",v2);
+      else if(/^(投放账号|账号|达人账号)$/.test(lb))put("go-account",v2);
+      else if(/^(预算|金额|费用|报价)$/.test(lb))put("go-budget",v2);
+      else if(/^(排期|档期|时间|发布时间|执行时间|上线时间|执行日期)$/.test(lb))put("go-schedule",v2);
+      else if(/^(需求|诉求|需求说明|商单诉求|内容方向|要求|KPI)$/.test(lb))put("go-req",v2);
+    }
+    /* 3) 自由文本兜底启发式：平台 / 金额 / 日期 / @账号 */
+    var f=readFields();
+    if(!f.platform){
+      var ps=[];["抖音","小红书","微博","B站","bilibili","快手","视频号","公众号"].forEach(function(p){if(raw.toLowerCase().indexOf(p.toLowerCase())>=0&&ps.indexOf(p)<0)ps.push(p)});
+      if(ps.length)put("go-platform",ps.join("、"));
+    }
+    if(!f.budget){
+      var mb=raw.match(/(?:预算|报价|费用|金额|成本)[^\d\n]{0,8}([\d.,]+\s*万?元?)/)||raw.match(/[￥¥]\s*([\d.,]+(?:\s*万)?)/);
+      if(mb)put("go-budget",mb[1].trim());
+    }
+    if(!f.schedule){
+      var ms=raw.match(/\d{1,2}月\d{1,2}[日号](?:\s*[-–—~至]\s*(?:\d{1,2}月)?\d{1,2}[日号])?/)||raw.match(/\d{1,2}[\/.]\d{1,2}(?:\s*[-–—~]\s*\d{1,2}[\/.]\d{1,2})?/);
+      if(ms)put("go-schedule",ms[0].trim());
+    }
+    if(!f.account){
+      var ma=raw.match(/@[\w\u4e00-\u9fa5-]+/g);
+      if(ma)put("go-account",Array.from(new Set(ma)).join("、"));
+    }
+    /* 4) 什么都没识别出来 → 整段放进需求说明，至少不丢信息 */
+    if(!hit.length){ if(set("go-req",raw)){hit.push("需求说明（整段原文）")} else {toast("识别到内容但对应字段已有值，未覆盖；请人工核对");return} }
+    gen();
+    toast(hit.length?("已识别填入："+Array.from(new Set(hit)).join("、")+"（空字段才填，手填内容未动）"):"未识别出可填内容");
+  }
+  document.getElementById("go-parse").addEventListener("click",parseBrief);
   gen();
 }
 
