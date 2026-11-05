@@ -1164,9 +1164,10 @@ function projModal(id){
       +'<div class="kpi-item kpi-full"><span class="kpi-lb">其他 KPI</span><input id="pj-kpi-other" value="'+(p&&p.kpiObj?esc(p.kpiObj.other||""):"")+'" placeholder="如 万赞视频5条、话题VV 1200万"></div>'
     +'</div></div>'
     +'<div class="fg"><label>阶段进度（完成的打勾 ✓，无需选状态）</label><div class="pj-todo">'
-      +[1,2,3,4,5,6,7,8].map(function(i){
+      +SN.map(function(_,k){
+        var i=k+1;
         var chk=p&&((p.stagesDone||[]).indexOf(i)>=0||(!p.stagesDone&&p.stage>=i));
-        return '<label class="pj-todo-item"><input type="checkbox" class="pj-stage-chk" value="'+i+'"'+(chk?" checked":"")+'><span>'+i+' - '+SN[i-1]+(i===8?" ✅":"")+'</span></label>';
+        return '<label class="pj-todo-item"><input type="checkbox" class="pj-stage-chk" value="'+i+'"'+(chk?" checked":"")+'><span>'+i+' - '+SN[k]+(i===SN_LAST?" ✅":"")+'</span></label>';
       }).join("")
     +'</div></div>'
     +'<div class="fg"><label>达成成果 / 完成效果（对应上面的 KPI，可从热点数据自动填入）</label>'
@@ -1202,8 +1203,8 @@ function projModal(id){
     var oldName=p?p.name:null;
     var done=[];document.querySelectorAll(".pj-stage-chk").forEach(function(c){if(c.checked)done.push(+c.value)});
     var stage=done.length?Math.max.apply(null,done):1;
-    /* status 改为派生字段（第 8 步「完结」打勾 = 已完成），保留字段以兼容后端抓取逻辑 */
-    var status=done.indexOf(8)>=0?"已完成":"进行中";
+    /* status 改为派生字段（最后一步「完结」打勾 = 已完成），保留字段以兼容后端抓取逻辑 */
+    var status=done.indexOf(SN_LAST)>=0?"已完成":"进行中";
     var kpiObj={cpm:document.getElementById("pj-kpi-cpm").value.trim(),rankOn:document.getElementById("pj-kpi-rankon").checked,rankName:document.getElementById("pj-kpi-rankname").value.trim(),other:document.getElementById("pj-kpi-other").value.trim()};
     var data={name:n,client:document.getElementById("pj-client").value,amount:document.getElementById("pj-amount").value,kpi:kpiText({kpiObj:kpiObj}),kpiObj:kpiObj,stage:stage,stagesDone:done,status:status,result:document.getElementById("pj-result").value.trim(),execTime:document.getElementById("pj-exectime").value.trim(),hotKw:document.getElementById("pj-hotkw").value.trim()};
     if(p){
