@@ -1864,11 +1864,11 @@ function genOrderModal(){
       else if(/^(需求|诉求|需求说明|商单诉求|项目需求|内容方向|话题词方向|话题词|要求|KPI|指令)$/.test(label))put("go-req",val);
     }
     /* 2)「标签：值」行形式 */
-    var re2=/^(项目名称|项目名|项目|品牌名|品牌|客户|甲方|商务|投放平台|平台|发布平台|渠道|投放账号|账号|达人账号|预算|金额|费用|报价|排期|档期|时间|发布时间|执行时间|上线时间|执行日期|需求|诉求|需求说明|商单诉求|内容方向|要求|KPI)\s*[:：]\s*(.+)$/gm;
+    var re2=/^(项目名称|项目名|项目|品牌名|品牌|客户|甲方|投放平台|平台|发布平台|渠道|投放账号|账号|达人账号|预算|金额|费用|报价|排期|档期|时间|发布时间|执行时间|上线时间|执行日期|需求|诉求|需求说明|商单诉求|内容方向|要求|KPI)\s*[:：]\s*(.+)$/gm;
     while((m=re2.exec(raw))){
       var lb=m[1],v2=m[2].trim();
       if(/^(项目名称|项目名|项目)$/.test(lb))put("go-projName",v2);
-      else if(/^(品牌名|品牌|客户|甲方|商务)$/.test(lb))put("go-brand",v2);
+      else if(/^(品牌名|品牌|客户|甲方)$/.test(lb))put("go-brand",v2);
       else if(/^(投放平台|平台|发布平台|渠道)$/.test(lb))put("go-platform",v2);
       else if(/^(投放账号|账号|达人账号)$/.test(lb))put("go-account",v2);
       else if(/^(预算|金额|费用|报价)$/.test(lb))put("go-budget",v2);
@@ -1886,7 +1886,7 @@ function genOrderModal(){
       if(mb)put("go-budget",mb[1].trim());
     }
     if(!f.schedule){
-      var ms=raw.match(/\d{1,2}月\d{1,2}[日号](?:\s*[-–—~至]\s*\d{1,2}[日号]?)?/)||raw.match(/\d{1,2}[\/.]\d{1,2}(?:\s*[-–—~]\s*\d{1,2}[\/.]\d{1,2})?/);
+      var ms=raw.match(/\d{1,2}月\d{1,2}[日号](?:\s*[-–—~至]\s*(?:\d{1,2}月)?\d{1,2}[日号])?/)||raw.match(/\d{1,2}[\/.]\d{1,2}(?:\s*[-–—~]\s*\d{1,2}[\/.]\d{1,2})?/);
       if(ms)put("go-schedule",ms[0].trim());
     }
     if(!f.account){
