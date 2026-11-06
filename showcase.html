@@ -261,6 +261,11 @@ textarea{resize:vertical;min-height:70px}
 /* ===== 热点 / 文档 / 复盘 ===== */
 .news-card{border-left:3px solid var(--pink);padding:2px 0 2px 12px;margin-bottom:10px}
 .doc-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0eeec}
+/* 文档行拖拽排序 */
+.doc-row .row-drag-h{cursor:grab;color:#c6bfae;font-size:12px;user-select:none;padding:0 2px;flex:none}
+.doc-row.dragging{opacity:.35}
+.doc-row.drag-over-a{box-shadow:inset 0 2px 0 var(--pink)}
+.doc-row.drag-over-b{box-shadow:inset 0 -2px 0 var(--pink)}
 .doc-note{flex-basis:100%;order:9;margin-top:4px;padding:5px 8px;background:#fdf6ef;border:1px dashed #e6cfa8;border-radius:6px;font-size:11px;color:#8a6d3b;line-height:1.5}
 .news-link{margin-top:5px;font-size:11px}
 .news-link a{color:var(--pink);text-decoration:none;word-break:break-all}
@@ -647,6 +652,7 @@ function orderItems(arr,key,idFn){
   return known.concat(unknown);
 }
 var _dragSrc=null;
+var _docSrcEl=null; /* 文档行拖拽源（与文件夹拖拽互斥） */
 function bindDrag(panelId,key){
   var panel=document.getElementById(panelId);
   if(!panel)return;
@@ -658,11 +664,13 @@ function bindDrag(panelId,key){
     }
   });
   panel.ondragstart=function(e){
+    if(_docSrcEl)return; /* 文档行拖拽进行中，不响应文件夹拖拽 */
     var it=e.target.closest&&e.target.closest(".drag-item");if(!it)return;
     _dragSrc=it;it.classList.add("dragging");e.dataTransfer.effectAllowed="move";
     try{e.dataTransfer.setData("text/plain",it.getAttribute("data-drag-id")||"");}catch(_){}
   };
   panel.ondragover=function(e){
+    if(_docSrcEl)return;
     var it=e.target.closest&&e.target.closest(".drag-item");if(!it||it===_dragSrc)return;
     e.preventDefault();
     var r=it.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
@@ -670,6 +678,7 @@ function bindDrag(panelId,key){
     it.classList.add(after?"drag-over-b":"drag-over-a");
   };
   panel.ondrop=function(e){
+    if(_docSrcEl)return; /* 文档行落点，交给行级 drop 处理 */
     var it=e.target.closest&&e.target.closest(".drag-item");if(!it||!_dragSrc)return;
     e.preventDefault();
     var r=it.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
@@ -693,6 +702,49 @@ function commitDrag(panelId,key){
   S.manual=S.manual||{};S.manual[key]=newOrder;S.manualTS=Date.now();
   S.save();
   RENDER[ct](); /* 重渲染当前 tab，应用新顺序（并推云端） */
+}
+/* ===== 文档行级拖拽（文件夹内排序，与文件夹拖拽互斥） =====
+   思路：行 DOM 重排后，按行的 data-di（渲染时的原始下标）重写 pj.docs 数组 */
+function bindDocDrag(){
+  var panel=document.getElementById("pnl-projdocs");if(!panel)return;
+  panel.querySelectorAll(".doc-row.drag-row").forEach(function(row){
+    row.addEventListener("dragstart",function(e){
+      e.stopPropagation();_docSrcEl=row;row.classList.add("dragging");
+      e.dataTransfer.effectAllowed="move";
+      try{e.dataTransfer.setData("text/plain",row.getAttribute("data-pj")+":"+row.getAttribute("data-di"));}catch(_){}
+    });
+    row.addEventListener("dragend",function(e){
+      e.stopPropagation();_docSrcEl=null;row.classList.remove("dragging");
+      panel.querySelectorAll(".doc-row.drag-over-a,.doc-row.drag-over-b").forEach(function(x){x.classList.remove("drag-over-a","drag-over-b")});
+    });
+    row.addEventListener("dragover",function(e){
+      if(!_docSrcEl||_docSrcEl===row)return;
+      if(_docSrcEl.getAttribute("data-pj")!==row.getAttribute("data-pj"))return; /* 只允许同一文件夹内排序 */
+      e.preventDefault();e.stopPropagation();
+      var r=row.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
+      panel.querySelectorAll(".doc-row.drag-over-a,.doc-row.drag-over-b").forEach(function(x){x.classList.remove("drag-over-a","drag-over-b")});
+      row.classList.add(after?"drag-over-b":"drag-over-a");
+    });
+    row.addEventListener("drop",function(e){
+      if(!_docSrcEl||_docSrcEl===row)return;
+      if(_docSrcEl.getAttribute("data-pj")!==row.getAttribute("data-pj"))return;
+      e.preventDefault();e.stopPropagation();
+      var r=row.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
+      if(after)row.parentNode.insertBefore(_docSrcEl,row.nextSibling);else row.parentNode.insertBefore(_docSrcEl,row);
+      commitDocDrag(+row.getAttribute("data-pj"));
+    });
+  });
+}
+function commitDocDrag(pjId){
+  var pj=S.projdocs.find(function(x){return x.id===pjId});if(!pj||!pj.docs)return;
+  var card=document.querySelector('#pnl-projdocs .drag-item[data-drag-id="'+pjId+'"]');if(!card)return;
+  var diOrder=[];
+  card.querySelectorAll(".doc-row.drag-row").forEach(function(rw){diOrder.push(+rw.getAttribute("data-di"))});
+  if(diOrder.length!==pj.docs.length)return; /* 期间数据有变，放弃本次落位 */
+  var newDocs=diOrder.map(function(i){return pj.docs[i]});
+  if(newDocs.some(function(d){return !d}))return;
+  pj.docs=newDocs;S.save();rpd();
+  toast("已更新文档顺序");
 }
 /* 已完成项目容错识别：news.project 可能是项目名缩写/前缀（如"希尔X盈香" vs 完整"希尔X盈香心动花园"）。
    仅当它等于某已完成项目名，或是某已完成项目名的前缀且不是任何进行中项目的前缀时，才视为已完成，
@@ -1280,12 +1332,13 @@ function rpd(){
         var hl=(d.link||"").trim();
         var lh=hl?'<a href="'+esc(hl)+'" target="_blank" rel="noopener">'+esc(hl)+'</a>':'<span class="text-xs" style="color:var(--muted)">待填写链接 · 点「编辑」添加</span>';
         var tag=PD_SECTIONS.indexOf(d.name)>=0?' <span class="badge badge-gray" style="font-size:10px;padding:0 5px">预置板块</span>':'';
-        return '<div class="doc-row"><span style="min-width:84px;font-size:12px;font-weight:600">'+esc(d.name)+tag+'</span>'+lh+'<button class="btn-ghost sh0" data-doc-edit="'+pj.id+':'+di+'">编辑</button><button class="btn-ghost btn-ghost-danger sh0" data-doc-del="'+pj.id+':'+di+'" title="删除该文档行">✕</button></div>';
+        return '<div class="doc-row drag-row" draggable="true" data-pj="'+pj.id+'" data-di="'+di+'"><span class="row-drag-h" title="拖拽排序">⠿</span><span style="min-width:84px;font-size:12px;font-weight:600">'+esc(d.name)+tag+'</span>'+lh+'<button class="btn-ghost sh0" data-doc-edit="'+pj.id+':'+di+'">编辑</button><button class="btn-ghost btn-ghost-danger sh0" data-doc-del="'+pj.id+':'+di+'" title="删除该文档行">✕</button></div>';
       }).join(""):'<div class="text-xs">暂无文档</div>')
       +'</div>';
   }).join(""):'<div class="empty">暂无项目文档</div>';
   document.getElementById("pnl-projdocs").innerHTML=html;
   bindDrag("pnl-projdocs","projdocs");
+  bindDocDrag();
   document.getElementById("add-pd-btn").addEventListener("click",function(){
     omod('<h3>新建项目文档夹</h3><div class="fg"><label>项目名称</label><input id="pd-project"></div>'
       +'<div class="row row-end gap-4 mt-12"><button class="btn" id="pdc">取消</button><button class="btn btn-primary" id="pds">保存</button></div>');
