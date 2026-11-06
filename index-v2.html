@@ -703,6 +703,49 @@ function commitDrag(panelId,key){
   S.save();
   RENDER[ct](); /* 重渲染当前 tab，应用新顺序（并推云端） */
 }
+/* ===== 文档行级拖拽（文件夹内排序，与文件夹拖拽互斥） =====
+   思路：行 DOM 重排后，按行的 data-di（渲染时的原始下标）重写 pj.docs 数组 */
+function bindDocDrag(){
+  var panel=document.getElementById("pnl-projdocs");if(!panel)return;
+  panel.querySelectorAll(".doc-row.drag-row").forEach(function(row){
+    row.addEventListener("dragstart",function(e){
+      e.stopPropagation();_docSrcEl=row;row.classList.add("dragging");
+      e.dataTransfer.effectAllowed="move";
+      try{e.dataTransfer.setData("text/plain",row.getAttribute("data-pj")+":"+row.getAttribute("data-di"));}catch(_){}
+    });
+    row.addEventListener("dragend",function(e){
+      e.stopPropagation();_docSrcEl=null;row.classList.remove("dragging");
+      panel.querySelectorAll(".doc-row.drag-over-a,.doc-row.drag-over-b").forEach(function(x){x.classList.remove("drag-over-a","drag-over-b")});
+    });
+    row.addEventListener("dragover",function(e){
+      if(!_docSrcEl||_docSrcEl===row)return;
+      if(_docSrcEl.getAttribute("data-pj")!==row.getAttribute("data-pj"))return; /* 只允许同一文件夹内排序 */
+      e.preventDefault();e.stopPropagation();
+      var r=row.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
+      panel.querySelectorAll(".doc-row.drag-over-a,.doc-row.drag-over-b").forEach(function(x){x.classList.remove("drag-over-a","drag-over-b")});
+      row.classList.add(after?"drag-over-b":"drag-over-a");
+    });
+    row.addEventListener("drop",function(e){
+      if(!_docSrcEl||_docSrcEl===row)return;
+      if(_docSrcEl.getAttribute("data-pj")!==row.getAttribute("data-pj"))return;
+      e.preventDefault();e.stopPropagation();
+      var r=row.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
+      if(after)row.parentNode.insertBefore(_docSrcEl,row.nextSibling);else row.parentNode.insertBefore(_docSrcEl,row);
+      commitDocDrag(+row.getAttribute("data-pj"));
+    });
+  });
+}
+function commitDocDrag(pjId){
+  var pj=S.projdocs.find(function(x){return x.id===pjId});if(!pj||!pj.docs)return;
+  var card=document.querySelector('#pnl-projdocs .drag-item[data-drag-id="'+pjId+'"]');if(!card)return;
+  var diOrder=[];
+  card.querySelectorAll(".doc-row.drag-row").forEach(function(rw){diOrder.push(+rw.getAttribute("data-di"))});
+  if(diOrder.length!==pj.docs.length)return; /* 期间数据有变，放弃本次落位 */
+  var newDocs=diOrder.map(function(i){return pj.docs[i]});
+  if(newDocs.some(function(d){return !d}))return;
+  pj.docs=newDocs;S.save();rpd();
+  toast("已更新文档顺序");
+}
 /* 已完成项目容错识别：news.project 可能是项目名缩写/前缀（如"希尔X盈香" vs 完整"希尔X盈香心动花园"）。
    仅当它等于某已完成项目名，或是某已完成项目名的前缀且不是任何进行中项目的前缀时，才视为已完成，
    避免误伤同名前缀的进行中项目（如"百度文库"前缀不能误删"百度文库-博物馆"）。 */
@@ -1295,6 +1338,7 @@ function rpd(){
   }).join(""):'<div class="empty">暂无项目文档</div>';
   document.getElementById("pnl-projdocs").innerHTML=html;
   bindDrag("pnl-projdocs","projdocs");
+  bindDocDrag();
   document.getElementById("add-pd-btn").addEventListener("click",function(){
     omod('<h3>新建项目文档夹</h3><div class="fg"><label>项目名称</label><input id="pd-project"></div>'
       +'<div class="row row-end gap-4 mt-12"><button class="btn" id="pdc">取消</button><button class="btn btn-primary" id="pds">保存</button></div>');
