@@ -664,11 +664,13 @@ function bindDrag(panelId,key){
     }
   });
   panel.ondragstart=function(e){
+    if(_docSrcEl)return; /* 文档行拖拽进行中，不响应文件夹拖拽 */
     var it=e.target.closest&&e.target.closest(".drag-item");if(!it)return;
     _dragSrc=it;it.classList.add("dragging");e.dataTransfer.effectAllowed="move";
     try{e.dataTransfer.setData("text/plain",it.getAttribute("data-drag-id")||"");}catch(_){}
   };
   panel.ondragover=function(e){
+    if(_docSrcEl)return;
     var it=e.target.closest&&e.target.closest(".drag-item");if(!it||it===_dragSrc)return;
     e.preventDefault();
     var r=it.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
@@ -676,6 +678,7 @@ function bindDrag(panelId,key){
     it.classList.add(after?"drag-over-b":"drag-over-a");
   };
   panel.ondrop=function(e){
+    if(_docSrcEl)return; /* 文档行落点，交给行级 drop 处理 */
     var it=e.target.closest&&e.target.closest(".drag-item");if(!it||!_dragSrc)return;
     e.preventDefault();
     var r=it.getBoundingClientRect();var after=(e.clientY-r.top)>r.height/2;
