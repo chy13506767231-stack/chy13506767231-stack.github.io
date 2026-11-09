@@ -71,6 +71,21 @@
    "updatedAt": 1793966417249
   },
   {
+   "id": 11,
+   "date": "8.4",
+   "text": "拉包",
+   "done": 1,
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 13,
+   "date": "8.5",
+   "text": "且初物料发布，需要授权",
+   "note": "",
+   "done": 1,
+   "updatedAt": 1793966417249
+  },
+  {
    "id": 14,
    "date": "8.5",
    "text": "长隆数据回收",
@@ -98,21 +113,6 @@
    "id": 18,
    "date": "8.6",
    "text": "长隆 复盘 数据回收",
-   "note": "",
-   "done": 1,
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 11,
-   "date": "8.4",
-   "text": "拉包",
-   "done": 1,
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 13,
-   "date": "8.5",
-   "text": "且初物料发布，需要授权",
    "note": "",
    "done": 1,
    "updatedAt": 1793966417249
@@ -680,6 +680,42 @@
   }
  ],
  "news": [
+  {
+   "id": 1,
+   "date": "7.29",
+   "source": "抖音",
+   "title": "丁禹兮新剧路透",
+   "summary": "可结合文库资源包做联动传播",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 2,
+   "date": "7.29",
+   "source": "小红书",
+   "title": "AI+教育话题走高",
+   "summary": "AI办公工具种草笔记量上涨",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 3,
+   "date": "7.28",
+   "source": "微博",
+   "title": "暑期文旅旺季",
+   "summary": "可结合地域文旅冲榜",
+   "project": "希尔X盈香心动花园",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 5,
+   "date": "8.4",
+   "source": "抖音",
+   "title": "恭喜你被分配到了各地文旅",
+   "summary": "文旅相关热点，可结合地域文旅冲榜",
+   "project": "希尔X盈香心动花园",
+   "updatedAt": 1793966417249
+  },
   {
    "id": 54,
    "date": "11.3",
@@ -9023,42 +9059,6 @@
    "match": false,
    "xhsLink": "",
    "updatedAt": 1793966417249
-  },
-  {
-   "id": 1,
-   "date": "7.29",
-   "source": "抖音",
-   "title": "丁禹兮新剧路透",
-   "summary": "可结合文库资源包做联动传播",
-   "project": "百度文库-WAIC",
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 2,
-   "date": "7.29",
-   "source": "小红书",
-   "title": "AI+教育话题走高",
-   "summary": "AI办公工具种草笔记量上涨",
-   "project": "百度文库-WAIC",
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 3,
-   "date": "7.28",
-   "source": "微博",
-   "title": "暑期文旅旺季",
-   "summary": "可结合地域文旅冲榜",
-   "project": "希尔X盈香心动花园",
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 5,
-   "date": "8.4",
-   "source": "抖音",
-   "title": "恭喜你被分配到了各地文旅",
-   "summary": "文旅相关热点，可结合地域文旅冲榜",
-   "project": "希尔X盈香心动花园",
-   "updatedAt": 1793966417249
   }
  ],
  "templates": [
@@ -9084,6 +9084,22 @@
    "dept": "投流咨询群",
    "name": "咨询模版+报备模板",
    "body": "【项目名称】\n【执行时间】\n【项目品类】品牌-3C电子\n【项目背景】\n【项目类型】保量/\n【项目KPI】678W播放/cpm40\n【项目金额】\n【投流预算】\n【外部账号数量】\n【内部账号数量】\n【星图/水下数量】\n【授权情况】\n【反馈时间】需2h内给到反馈\n+资源包截图",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 4,
+   "cat": "投流",
+   "dept": "投流咨询群",
+   "name": "投流报备模版",
+   "body": "【客户主体】\n【商务】\n【项目类型】\n【项目名称】\n【发布类别】\n【特殊备注】\n【合作秒数】\n【分发形式】\n【客户代投】\n【投流负责人】\n+资源包截图",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 5,
+   "cat": "投流",
+   "dept": "投流咨询群",
+   "name": "投流咨询模版",
+   "body": "【项目名称】\n【执行时间】\n【项目品类】\n【项目背景】\n【项目类型】\n【项目KPI】\n【项目金额】\n【投流预算】\n【外部账号数量】\n【内部账号数量】\n【星图/水下数量】\n【授权情况】\n【反馈时间】",
    "updatedAt": 1793966417249
   },
   {
@@ -9127,22 +9143,6 @@
    "updatedAt": 1793966417249
   },
   {
-   "id": 4,
-   "cat": "投流",
-   "dept": "投流咨询群",
-   "name": "投流报备模版",
-   "body": "【客户主体】\n【商务】\n【项目类型】\n【项目名称】\n【发布类别】\n【特殊备注】\n【合作秒数】\n【分发形式】\n【客户代投】\n【投流负责人】\n+资源包截图",
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 5,
-   "cat": "投流",
-   "dept": "投流咨询群",
-   "name": "投流咨询模版",
-   "body": "【项目名称】\n【执行时间】\n【项目品类】\n【项目背景】\n【项目类型】\n【项目KPI】\n【项目金额】\n【投流预算】\n【外部账号数量】\n【内部账号数量】\n【星图/水下数量】\n【授权情况】\n【反馈时间】",
-   "updatedAt": 1793966417249
-  },
-  {
    "cat": "媒介",
    "dept": "游戏组—媒介下单群",
    "name": "媒介下单模板",
@@ -9177,40 +9177,12 @@
    "note": ""
   },
   {
-   "id": 3,
-   "type": "协作流程",
-   "link": "https://my.feishu.cn/wiki/Go3lw5N5EiR0BukvrP4c6bfXnAg",
-   "name": "各部门跨部门协作流程",
-   "updatedAt": 1793966417249
-  },
-  {
    "id": 4,
    "type": "刊例及接单标准",
    "link": "https://my.feishu.cn/docx/AIUvdGS7ioLfN6xxdJNcswHnnjh?from=from_parent_docx",
    "name": "MCN协作/接单标准",
    "updatedAt": 1793966417249,
    "note": ""
-  },
-  {
-   "id": 5,
-   "type": "销售学习",
-   "link": "https://vcn1s0k19p68.feishu.cn/wiki/LmIAwIW4iiwuUdk9h6acKn19nwh",
-   "name": "销售学习/散客报价/年框",
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 6,
-   "type": "冲榜SOP",
-   "link": "https://my.feishu.cn/wiki/Dj8vw7MIaia80LkFv6ZcdVHCnze",
-   "name": "抖音基础冲榜流程",
-   "updatedAt": 1793966417249
-  },
-  {
-   "id": 7,
-   "type": "冲榜SOP",
-   "link": "https://my.feishu.cn/wiki/ZaznwRvi4iba8TkySmLcVYA3nBb",
-   "name": "微博冲榜流程",
-   "updatedAt": 1793966417249
   },
   {
    "id": 8,
@@ -9304,6 +9276,34 @@
    "updatedAt": 1793966417249
   },
   {
+   "id": 3,
+   "type": "协作流程",
+   "link": "https://my.feishu.cn/wiki/Go3lw5N5EiR0BukvrP4c6bfXnAg",
+   "name": "各部门跨部门协作流程",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 5,
+   "type": "销售学习",
+   "link": "https://vcn1s0k19p68.feishu.cn/wiki/LmIAwIW4iiwuUdk9h6acKn19nwh",
+   "name": "销售学习/散客报价/年框",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 6,
+   "type": "冲榜SOP",
+   "link": "https://my.feishu.cn/wiki/Dj8vw7MIaia80LkFv6ZcdVHCnze",
+   "name": "抖音基础冲榜流程",
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 7,
+   "type": "冲榜SOP",
+   "link": "https://my.feishu.cn/wiki/ZaznwRvi4iba8TkySmLcVYA3nBb",
+   "name": "微博冲榜流程",
+   "updatedAt": 1793966417249
+  },
+  {
    "link": "https://sso.oceanengine.com/xingtu/login?role=1",
    "type": "星图下单",
    "name": "星图平台",
@@ -9394,14 +9394,6 @@
  ],
  "reviews": [
   {
-   "id": 1,
-   "project": "百度文库-WAIC",
-   "good": "节奏把控好,投流及时",
-   "improve": "审核需加checklist",
-   "reusable": "发布SOP可复用",
-   "updatedAt": 1793966417249
-  },
-  {
    "id": 2,
    "project": "希尔X盈香",
    "good": "策略详细,出词快",
@@ -9427,6 +9419,14 @@
    "id": 4,
    "kind": "review",
    "editedAt": 1786936786975,
+   "updatedAt": 1793966417249
+  },
+  {
+   "id": 1,
+   "project": "百度文库-WAIC",
+   "good": "节奏把控好,投流及时",
+   "improve": "审核需加checklist",
+   "reusable": "发布SOP可复用",
    "updatedAt": 1793966417249
   }
  ],
@@ -9604,22 +9604,24 @@
  "daily": [
   {
    "title": "巨蟹座每日运势",
-   "date": "11.9",
+   "date": "11.3",
    "stars": {
-    "综合": 4,
+    "综合": 3,
     "爱情": 3,
     "事业": 4,
-    "财富": 2
+    "财富": 1
    },
-   "content": "综合运势：整体运势呈平稳向上态势，日常事务推进顺畅，人际互动氛围融洽，虽偶有细碎琐事干扰，但不影响整体节奏，可按既定安排推进各项事宜，无需过度焦虑。星3座3屋",
-   "id": 1
+   "content": "综合运势：今日整体运势处于平稳偏上的状态，日常事务推进顺畅，人际互动温和，虽无突破性的机遇，但也不会出现突发的棘手问题，整体状态松弛有度，适合按部就班处理既定事务，维持现有生活节奏即可。星t座t屋",
+   "id": 1,
+   "updatedAt": 1793966417249
   },
   {
    "title": "喜水木の今日tip",
-   "date": "11.9",
-   "tip": "适合用木质文具、穿棉麻或深色衣物，少穿大红大紫。",
-   "content": "今日喜水木 tip：适合用木质文具、穿棉麻或深色衣物，少穿大红大紫。\n\n适合：补水、接触绿植、蓝/绿/黑色系、朝东/北方。\n慎用：过燥、过红、暴饮暴食。",
-   "id": 2
+   "date": "11.3",
+   "tip": "喜水木者晚间可泡脚、冥想或听轻音乐，避免熬夜耗水。",
+   "content": "今日喜水木 tip：喜水木者晚间可泡脚、冥想或听轻音乐，避免熬夜耗水。\n\n适合：补水、接触绿植、蓝/绿/黑色系、朝东/北方。\n慎用：过燥、过红、暴饮暴食。",
+   "id": 2,
+   "updatedAt": 1793966417249
   }
  ],
  "manual": {
