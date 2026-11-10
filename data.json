@@ -500,7 +500,9 @@
     "other": "冲本地榜+话题报告2亿"
    },
    "stage": 1,
-   "stagesDone": [],
+   "stagesDone": [
+    1
+   ],
    "status": "进行中",
    "result": "",
    "execTime": "11月13日",
