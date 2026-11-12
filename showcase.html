@@ -780,6 +780,8 @@ function copyText(text){
 }
 function dateKey(d){var m=String(d).match(/(\d+)\.(\d+)/);return m?(+m[1])*100+(+m[2]):0}
 function todayMD(){var n=new Date();return (n.getMonth()+1)+"."+n.getDate()}
+/* 热点日期排序键：把 "11.12" 解析成可比较的数值（11*100+12），无日期的排最后 */
+function dateVal(s){var m=/^(\d{1,2})\.(\d{1,2})/.exec(s||"");return m?(+m[1])*100+(+m[2]):0;}
 function parseDateMD(s){if(!s)return Date.now();var p=String(s).split(".");if(p.length>=2){var mo=parseInt(p[0],10),da=parseInt(p[1],10);if(mo>=1&&mo<=12&&da>=1&&da<=31){var d=new Date();d.setMonth(mo-1);d.setDate(da);d.setHours(12,0,0,0);return d.getTime();}}var t=Date.parse(s);return isNaN(t)?Date.now():t}
 
 var mbg=document.getElementById("modal-bg"),min=document.getElementById("modal-inner");
@@ -1456,6 +1458,8 @@ function rn(){
     }
     return true;
   });
+  /* 默认按日期从新到旧排（手动拖拽过则用你的排序覆盖） */
+  visNews=visNews.slice().sort(function(a,b){return dateVal(b.date)-dateVal(a.date)});
   visNews=orderItems(visNews,"news",function(n){return n.id});
 
   if(NW_TAB==="proj"){
