@@ -782,6 +782,18 @@ function dateKey(d){var m=String(d).match(/(\d+)\.(\d+)/);return m?(+m[1])*100+(
 function todayMD(){var n=new Date();return (n.getMonth()+1)+"."+n.getDate()}
 /* 热点日期排序键：把 "11.12" 解析成可比较的数值（11*100+12），无日期的排最后 */
 function dateVal(s){var m=/^(\d{1,2})\.(\d{1,2})/.exec(s||"");return m?(+m[1])*100+(+m[2]):0;}
+/* 热点是否落在「最近 N 天（含今天）」窗口内：用于「只保留最近三天」 */
+function recentNewsOK(dateStr, days){
+  var p=String(dateStr||"").split(".");
+  if(p.length<2)return true;
+  var mo=parseInt(p[0],10), da=parseInt(p[1],10);
+  if(!(mo>=1&&mo<=12&&da>=1&&da<=31))return true;
+  var now=new Date();
+  var d=new Date(now.getFullYear(), mo-1, da, 12,0,0,0);
+  if(d.getTime() > now.getTime()+3*86400000){ d=new Date(now.getFullYear()-1, mo-1, da, 12,0,0,0); }
+  var cutoff=new Date(now.getFullYear(), now.getMonth(), now.getDate()-(days-1), 0,0,0,0);
+  return d.getTime() >= cutoff.getTime();
+}
 function parseDateMD(s){if(!s)return Date.now();var p=String(s).split(".");if(p.length>=2){var mo=parseInt(p[0],10),da=parseInt(p[1],10);if(mo>=1&&mo<=12&&da>=1&&da<=31){var d=new Date();d.setMonth(mo-1);d.setDate(da);d.setHours(12,0,0,0);return d.getTime();}}var t=Date.parse(s);return isNaN(t)?Date.now():t}
 
 var mbg=document.getElementById("modal-bg"),min=document.getElementById("modal-inner");
@@ -1458,6 +1470,10 @@ function rn(){
     }
     return true;
   });
+  /* 只保留最近三天（含今天）：更早的热点自动收起，不显示 */
+  var RECENT_DAYS=3;
+  visNews=visNews.filter(function(n){return recentNewsOK(n.date, RECENT_DAYS);});
+
   /* 默认按日期从新到旧排（手动拖拽过则用你的排序覆盖） */
   visNews=visNews.slice().sort(function(a,b){return dateVal(b.date)-dateVal(a.date)});
   visNews=orderItems(visNews,"news",function(n){return n.id});
