@@ -1458,6 +1458,8 @@ function rn(){
     }
     return true;
   });
+  /* 默认按日期从新到旧排（手动拖拽过则用你的排序覆盖） */
+  visNews=visNews.slice().sort(function(a,b){return dateVal(b.date)-dateVal(a.date)});
   visNews=orderItems(visNews,"news",function(n){return n.id});
 
   if(NW_TAB==="proj"){
