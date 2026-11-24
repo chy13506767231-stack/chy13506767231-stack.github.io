@@ -599,6 +599,7 @@ function wbShowSettings(){
     if(off)off.addEventListener("click",function(){if(confirm("关闭后云端数据将变回明文，任何人拿到网址都能看到。确定关闭？"))apply(false,"")});
   }).catch(function(){toast("无法连接本地服务",3000)});
 }
+window.wbShowSettings=wbShowSettings; /* 暴露给头部🔒按钮（在另一个 script 里绑定） */
 
 /* ================= 云端存储（GitHub）：手机/电脑多设备共享同一份数据 ================= */
 /* 读取：raw.githubusercontent.com 免认证、无频率限制，所有设备可用。
@@ -3005,6 +3006,13 @@ function linkModal(key,id){
   });
 }
 
+})();
+</script>
+<script>
+/* ===== 数据保密设置入口 ===== */
+(function(){
+  var b=document.getElementById('wb-lock-btn');
+  if(b)b.addEventListener('click',function(){wbShowSettings()});
 })();
 </script>
 <script>
