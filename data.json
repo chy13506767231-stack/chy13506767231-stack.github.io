@@ -1,1 +1,500 @@
-ENC1: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
+{
+ "todos": [
+  {
+   "id": 1,
+   "date": "7.21",
+   "text": "回收视频数据",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "date": "7.21",
+   "text": "自学销售政策Q3",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "date": "7.23",
+   "text": "精简梳理SOP文档",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 4,
+   "date": "7.23",
+   "text": "复盘操作卡点",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 5,
+   "date": "7.23",
+   "text": "梳理冲榜流程复盘",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 6,
+   "date": "7.23",
+   "text": "盈香心动乐园冲榜",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 7,
+   "date": "7.24",
+   "text": "数据回收表",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 8,
+   "date": "7.27",
+   "text": "收盈香和WAIC数据",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 9,
+   "date": "7.28",
+   "text": "文库X丁禹兮资源包",
+   "done": 1,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 10,
+   "date": "7.30",
+   "text": "CRM录入",
+   "done": 0,
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 11,
+   "date": "8.4",
+   "text": "拉包",
+   "done": 0,
+   "updatedAt": 1795510650349
+  }
+ ],
+ "projects": [
+  {
+   "id": 1,
+   "name": "百度文库-WAIC",
+   "client": "百度文库",
+   "amount": "待确认",
+   "kpi": "万赞+冲榜",
+   "stage": 4,
+   "status": "执行中",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "name": "希尔X盈香心动花园",
+   "client": "希尔",
+   "amount": "待确认",
+   "kpi": "佛山同城榜+种草榜",
+   "stage": 5,
+   "status": "执行中",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "projdocs": [
+  {
+   "id": 1,
+   "project": "百度文库-WAIC",
+   "docs": [
+    {
+     "name": "执行文档",
+     "link": "https://my.feishu.cn/wiki/N24Kw6vkIiw9rUkA7MacfmGhnbc"
+    },
+    {
+     "name": "对客数据回收",
+     "link": "https://my.feishu.cn/wiki/FvcLwl4SQiyeBukExxTck8elnDf"
+    },
+    {
+     "name": "对内数据回收",
+     "link": "https://my.feishu.cn/wiki/OniHwKhn0iCy8YkywaucE4aMnhb"
+    },
+    {
+     "name": "BF文档",
+     "link": ""
+    },
+    {
+     "name": "策划文档",
+     "link": ""
+    },
+    {
+     "name": "数据回收",
+     "link": ""
+    }
+   ],
+   "skip": [],
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "project": "希尔X盈香心动花园",
+   "docs": [
+    {
+     "name": "执行文档",
+     "link": "https://my.feishu.cn/wiki/EvgOw1qskigCbCkR53ScFo1FnTh"
+    },
+    {
+     "name": "BF文档",
+     "link": ""
+    },
+    {
+     "name": "策划文档",
+     "link": ""
+    },
+    {
+     "name": "数据回收",
+     "link": ""
+    }
+   ],
+   "skip": [],
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "project": "百度文库-博物馆",
+   "docs": [
+    {
+     "name": "执行文档",
+     "link": "https://my.feishu.cn/wiki/OH6rw3o2xigX39kAENbcf37MnDb"
+    }
+   ],
+   "updatedAt": 1795510650349
+  }
+ ],
+ "news": [
+  {
+   "id": 1,
+   "date": "7.29",
+   "source": "抖音",
+   "title": "丁禹兮新剧路透",
+   "summary": "可结合文库资源包做联动传播",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "date": "7.29",
+   "source": "小红书",
+   "title": "AI+教育话题走高",
+   "summary": "AI办公工具种草笔记量上涨",
+   "project": "百度文库-WAIC",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "date": "7.28",
+   "source": "微博",
+   "title": "暑期文旅旺季",
+   "summary": "可结合地域文旅冲榜",
+   "project": "希尔X盈香心动花园",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 4,
+   "date": "8.4",
+   "source": "微博",
+   "title": "迪丽热巴推特万赞的造型",
+   "summary": "万赞相关热点",
+   "project": "",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 5,
+   "date": "8.4",
+   "source": "抖音",
+   "title": "恭喜你被分配到了各地文旅",
+   "summary": "文旅相关热点，可结合地域文旅冲榜",
+   "project": "希尔X盈香心动花园",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "templates": [
+  {
+   "id": 1,
+   "cat": "MCN",
+   "dept": "MCN接单群",
+   "name": "下单模版",
+   "body": "【项目/品牌名】{{项目名称}}\n【商务】\n【商单诉求】{{需求说明}}\n【投放平台】{{平台}}\n【投放形式】\n【投放账号】{{账号}}\n【发布时间】{{排期}}\n【话题词+方向】\n【视频时长】\n【素材链接】\n【素材是否有版权/获得授权】\n【指令】\n【脚本交付方式】\n【备注】",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "cat": "MCN",
+   "dept": "MCN接单群",
+   "name": "后续指令模版",
+   "body": "【项目】{{项目名称}}\n【平台】{{平台}}\n【执行文档】\n【账号】{{账号}}\n【反馈】\n【指令】",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "cat": "投流",
+   "dept": "投流咨询群",
+   "name": "返链模板",
+   "body": "【客户主体】{{品牌}}\n【项目类型】\n【产品类型】冲榜/保量/全案\n【项目名称】{{项目名称}}\n【销售名称】\n【发布类别】\n【是否真人】\n【特殊备注】\n【是否需要返投流截图】\n【合作秒数】\n【分发形式】\n【客户代投】\n【投流负责人】",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 4,
+   "cat": "投流",
+   "dept": "投流咨询群",
+   "name": "报备模版",
+   "body": "【客户主体】{{品牌}}\n【商务】\n【项目类型】\n【项目名称】{{项目名称}}\n【发布类别】\n【特殊备注】\n【合作秒数】\n【分发形式】\n【客户代投】\n【投流负责人】\n+资源包截图",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 5,
+   "cat": "投流",
+   "dept": "投流咨询群",
+   "name": "咨询模版",
+   "body": "【项目名称】{{项目名称}}\n【执行时间】{{排期}}\n【项目品类】\n【项目背景】\n【项目类型】\n【项目KPI】\n【项目金额】{{预算}}\n【投流预算】\n【外部账号数量】{{账号}}\n【内部账号数量】\n【星图/水下数量】\n【授权情况】\n【反馈时间】",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 6,
+   "cat": "策划",
+   "dept": "策划下单群",
+   "name": "策划部下单模版",
+   "body": "【项目名称】{{项目名称}}\n【客户组-花名】\n【执行日期】{{排期}}\n【是否确认执行】\n【商务大名】\n【客户主体】{{品牌}}\n【客户等级】\n【平台金额】{{预算}}\n【策划费占比】\n【提交时间】\n【项目内容】\n【项目需求】{{需求说明}}",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 7,
+   "cat": "策划",
+   "dept": "策划下单群",
+   "name": "MCN用策划需求模版",
+   "body": "【项目名称】{{项目名称}}\n【执行日期】{{排期}}\n【商务大名】\n【客户组-花名】\n【是否确认执行】\n【客户等级】\n【平台金额】{{预算}}\n【策划费占比】\n【提交时间】\n【项目内容】\n【项目需求】{{需求说明}}",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 8,
+   "cat": "媒介",
+   "dept": "媒介对接群",
+   "name": "拓新模版",
+   "body": "【项目信息是否可以对外】\n【下单时间】\n【商务】\n【项目名称】{{项目名称}}\n【客户主体】{{品牌}}\n【平台】{{平台}}\n【预算范围】{{预算}}\n【账号数量】{{账号}}\n【账号类型】\n【粉丝量要求】\n【内容方向】{{需求说明}}\n【提词需求】\n【发布时间】{{排期}}\n【素材提供方】\n【备注】",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "impdocs": [
+  {
+   "id": 1,
+   "type": "刊例",
+   "link": "https://hcnrhu5l3kr1.feishu.cn/wiki/P9RTwVYI2ioSedknYB9c2ZH3nCe",
+   "name": "会火刊例-2026年Q3",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "type": "销售政策",
+   "link": "https://hcnrhu5l3kr1.feishu.cn/wiki/B4Maw3m6Hi2HYhkRbAUcikhBnkw",
+   "name": "销售政策-2026年Q3",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "type": "协作流程",
+   "link": "https://my.feishu.cn/wiki/Go3lw5N5EiR0BukvrP4c6bfXnAg",
+   "name": "各部门跨部门协作流程",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 4,
+   "type": "MCN标准",
+   "link": "https://my.feishu.cn/wiki/Om1mwbFsIi7IQwk94dJcH8QEnsg",
+   "name": "MCN协作/接单标准",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 5,
+   "type": "销售学习",
+   "link": "https://vcn1s0k19p68.feishu.cn/wiki/LmIAwIW4iiwuUdk9h6acKn19nwh",
+   "name": "销售学习/散客报价/年框",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 6,
+   "type": "冲榜SOP",
+   "link": "https://my.feishu.cn/wiki/Dj8vw7MIaia80LkFv6ZcdVHCnze",
+   "name": "抖音基础冲榜流程",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 7,
+   "type": "冲榜SOP",
+   "link": "https://my.feishu.cn/wiki/ZaznwRvi4iba8TkySmLcVYA3nBb",
+   "name": "微博冲榜流程",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 8,
+   "type": "案例库",
+   "link": "https://my.feishu.cn/sheets/IwLBs5kczhRJiitF0bOc276Mnwf",
+   "name": "会火案例库",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 9,
+   "type": "学习",
+   "link": "https://my.feishu.cn/wiki/FlAXwAzCyiwTLNkhryCceJSnnMW",
+   "name": "行业基础认知",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 10,
+   "type": "数据",
+   "link": "https://my.feishu.cn/sheets/VgwssGnGZhpQFIte7r5cFgGBn0g",
+   "name": "新会火抖音矩阵",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 11,
+   "type": "业务标准",
+   "link": "https://my.feishu.cn/docx/ZWOod7Ga1oV0FNxX07VcxprSnhh",
+   "name": "整合型业务介绍及接单标准",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 12,
+   "type": "媒介",
+   "link": "https://my.feishu.cn/sheets/WMaTsYQKah3AvQtrJsTccNuEnne",
+   "name": "整合营销外部媒介库",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 13,
+   "type": "ERP",
+   "link": "https://scn2itzo1scb.feishu.cn/wiki/CRIBw7cqCif2rIkCrUlc82Agnxh",
+   "name": "新ERP用户操作手册",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 14,
+   "type": "ERP",
+   "link": "https://scn2itzo1scb.feishu.cn/wiki/QC8vw02lCiCuogksBrHcRtyInkh",
+   "name": "新ERP上线验收",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 15,
+   "type": "ERP",
+   "link": "https://tcnwpv88o2ir.feishu.cn/wiki/KeREwrpOBifiR8kJw3Hc1cVjnue",
+   "name": "新ERP录入订单手册",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 16,
+   "type": "媒介",
+   "link": "https://my.feishu.cn/wiki/XShKwDIVMivGMGkIDd0cgzYLnhc",
+   "name": "2026年媒介外部账号仪表盘",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 17,
+   "type": "联动文档",
+   "link": "https://my.feishu.cn/wiki/BmxpwyztnijEYlkrWzWcJEGNnrc",
+   "name": "工作台联动文档（刷新源）",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "reviews": [
+  {
+   "id": 1,
+   "project": "百度文库-WAIC",
+   "good": "节奏把控好,投流及时",
+   "improve": "审核需加checklist",
+   "reusable": "发布SOP可复用",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "project": "希尔X盈香心动花园",
+   "good": "策略详细,出词快",
+   "improve": "15分钟check",
+   "reusable": "同城榜策略可复用",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "notes": [],
+ "scripts": [
+  {
+   "id": 1,
+   "scene": "提词未通过",
+   "body": "告知非100%通过，同步多给推流冲万赞爆款",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "scene": "热度无涨幅",
+   "body": "前期等发酵，若仍无涨可能被限流",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "scene": "品牌露出",
+   "body": "前置告知风险，屏蔽限流不补发",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 4,
+   "scene": "冲榜客户要求品牌",
+   "body": "降露出比例，评论区自评+编辑tag置换",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "aitool": [
+  {
+   "id": 1,
+   "name": "NotebookLM",
+   "url": "https://notebooklm.google.com/",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "name": "Notion 入门",
+   "url": "https://app.notion.com/p/Getting-Started-on-Mobile-57f65cb45cb64e25a693f79a04794564",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "name": "豆包",
+   "url": "https://www.doubao.com/chat/skills",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "fun": [
+  {
+   "id": 1,
+   "name": "Threads",
+   "url": "https://www.threads.com/",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 2,
+   "name": "Instagram",
+   "url": "https://www.instagram.com/",
+   "updatedAt": 1795510650349
+  },
+  {
+   "id": 3,
+   "name": "YouTube",
+   "url": "https://www.youtube.com/",
+   "updatedAt": 1795510650349
+  }
+ ],
+ "daily": [],
+ "manual": {},
+ "manualTS": 0,
+ "deleted": {
+  "projects": [
+   "百度文库-博物馆",
+   "百度文库-小爆款"
+  ]
+ }
+}
