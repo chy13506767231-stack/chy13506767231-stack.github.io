@@ -424,6 +424,7 @@ textarea{resize:vertical;min-height:70px}
       </div>
     </div>
     <div class="header-mascot">
+      <button id="wb-lock-btn" title="数据保密设置" style="background:rgba(255,255,255,.6);border:none;border-radius:50%;cursor:pointer;width:26px;height:26px;padding:0;margin-right:6px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 1px 4px rgba(60,70,90,.25);align-self:flex-start">🔒</button>
       <button id="wallpaper-btn" title="更换壁纸（右键恢复默认）" style="background:transparent;border:none;cursor:pointer;width:44px;height:60px;padding:0;margin-right:2px;display:flex;align-items:center;justify-content:center;transition:transform .15s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'"><img src="assets/kitty-btn.png" alt="更换壁纸" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none"></button>
       <div style="position:relative;display:flex;flex-direction:column;align-items:center">
         <img class="boys-header" id="boys-header" src="assets/header-pool/boy-duo.png" alt="木木酱の小伙伴" title="点击暂停/继续轮换">
@@ -606,10 +607,22 @@ var CLOUD={REPO:"chy13506767231-stack/chy13506767231-stack.github.io",FILE:"data
 function cloudObj(){var o={};STORE_KEYS.forEach(function(k){o[k]=S[k]});return o}
 function cloudGet(cb){
   /* 读取：走 GitHub Pages（同域名无跨域，国内可达）。
-     加 ?t= 时间戳破 CDN 缓存。 */
+     加 ?t= 时间戳破 CDN 缓存。若云端已加密(ENC1:)，先解锁+解密再回调明文对象。 */
   fetch("https://chy13506767231-stack.github.io/data.json?t="+Date.now(),{headers:{"User-Agent":"Mozilla/5.0"}})
-    .then(function(r){return r.ok?r.json():null})
-    .then(function(j){cb(j)})
+    .then(function(r){return r.ok?r.text():null})
+    .then(function(txt){
+      if(!txt){cb(null);return}
+      var s=txt.trim();
+      if(s.indexOf("ENC1:")===0){
+        var pw=wbGetPass();
+        if(!pw){ wbShowUnlock(s,cb); return; }  /* 没密码：弹解锁框，解开后回调 */
+        wbDecrypt(s,pw).then(function(obj){cb(obj)}).catch(function(){
+          wbSetPass(""); wbShowUnlock(s,cb);  /* 密码失效/被改：清掉重输 */
+        });
+      }else{
+        try{cb(JSON.parse(s))}catch(e){cb(null)}
+      }
+    })
     .catch(function(){cb(null)});
 }
 function cloudPut(obj,cb){
